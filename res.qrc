@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>img/mainmenu.png</file>
+        <file>img/Play.png</file>
+        <file>img/Profile.jpg</file>
+        <file>img/Settings.jpg</file>
+    </qresource>
+</RCC>
