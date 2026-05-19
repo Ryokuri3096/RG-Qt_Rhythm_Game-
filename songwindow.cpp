@@ -8,6 +8,7 @@ SongWindow::SongWindow(QMainWindow *parent)
     , m_mainWin(nullptr)
 {
     ui->setupUi(this);
+    ui->startButton->hide();
 
     loadCharts();
 }
@@ -83,10 +84,13 @@ void SongWindow::loadCharts()
         // 创建按钮 设置按钮样式
         QPushButton *btn = new QPushButton(btnText, container);
         btn->setMinimumHeight(100);
+        // btn->setStyleSheet(R"(QPushButton:hover {border: 1px solid #5078a0;border-radius: 2px;})");
 
         // 连接点击信号（示例：打印绝对路径）
-        connect(btn, &QPushButton::clicked, this, [absolutePath, btnText]() {
+        connect(btn, &QPushButton::clicked, this, [this, absolutePath, btnText, jsonObj]() {
             qDebug() << "Clicked:" << btnText;
+            updateLeftPanel(absolutePath, jsonObj);
+            ui->startButton->show();
             // 在这里可以打开文件、加载图表等
         });
 
@@ -120,5 +124,71 @@ QJsonObject SongWindow::loadJsonFile(const QString &path)
     }
 
     return doc.object();
+}
+
+QString SongWindow::findCoverImage(const QString &dirPath)
+{
+    QDir dir(dirPath);
+    QStringList filters;
+    filters << "*.png" << "*.jpg" << "*.jpeg" << "*.bmp";
+    QFileInfoList images = dir.entryInfoList(filters, QDir::Files);
+    if (!images.isEmpty())
+        return images.first().absoluteFilePath();
+    return QString();
+}
+
+void SongWindow::updateLeftPanel(const QString &jsonPath, const QJsonObject &jsonObj)
+{
+    // 1. 处理封面图片
+    QFileInfo jsonFileInfo(jsonPath);
+    QString dirPath = jsonFileInfo.absolutePath();
+    QString imagePath = findCoverImage(dirPath);
+
+    auto *coverLabel = ui->coverLabel;
+    auto *infoLabel = ui->infoLabel;
+
+    if (!imagePath.isEmpty()) {
+        QPixmap cover(imagePath);
+        coverLabel->setPixmap(cover.scaled(coverLabel->width(),
+                                           coverLabel->height(),
+                                           Qt::IgnoreAspectRatio, // 强制拉伸 把曲绘变成正方形
+                                           Qt::SmoothTransformation));
+        ui->coverLabel->setStyleSheet("border: 4px solid #360054;");
+    } else {
+        coverLabel->setPixmap(QPixmap());   // 清空图片
+    }
+
+    // 2. 提取并显示歌曲信息
+    QJsonObject metaObj = jsonObj.value("meta").toObject();
+    QJsonObject songObj = metaObj.value("song").toObject();
+
+    QString title = songObj.value("title").toString("unknown");
+    QString artist = songObj.value("artist").toString("unknown");
+    QString difficulty = songObj.value("difficulty").toString("?");
+    // 可根据需要继续提取其他字段
+
+    QString infoHtml = QString(
+                           "<table width='100%' cellspacing='0' cellpadding='0' style='color:white;'>"
+                           "<tr>"
+                           // 左侧：歌曲标题与艺术家
+                           "<td valign='bottom' style='padding-right:10px;'>"
+                           "<b style='font-size:24px;'>%1</b><br>"
+                           "<span style='color:#ccc; font-size:14px;'>%2</span>"
+                           "</td>"
+                           // 右侧：难度
+                           "<td align='right' valign='bottom'>"
+                           "<span style='font-size:32px; font-weight:bold;'>Lv.%3</span>"
+                           "</td>"
+                           "</tr>"
+                           "</table>"
+                           ).arg(title, artist, difficulty);
+
+    infoLabel->setText(infoHtml);
+    infoLabel->setWordWrap(true);
+}
+
+void SongWindow::on_startButton_clicked()
+{
+
 }
 

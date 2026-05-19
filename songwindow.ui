@@ -25,6 +25,12 @@
      <height>50</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">/*QPushButton:hover {
+    border: 1px solid #5078a0;
+    border-radius: 2px;
+}*/</string>
+   </property>
    <property name="text">
     <string>Back</string>
    </property>
@@ -42,8 +48,17 @@
     <bool>true</bool>
    </property>
    <property name="styleSheet">
-    <string notr="true">border: 1px solid #888888;
-border-radius: 4px;</string>
+    <string notr="true">QScrollArea {
+    /*border: 1px solid #666666;*/
+	background-color: rgba(0,0,0,0.3);
+    padding: 0px;
+    border-radius: 4px;
+}
+QScrollArea::viewport { border: none; }
+QScrollArea:hover {
+    border: 1px solid #5078a0;
+	border-radius: 4px;
+}</string>
    </property>
    <property name="widgetResizable">
     <bool>true</bool>
@@ -53,11 +68,77 @@ border-radius: 4px;</string>
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>499</width>
-      <height>649</height>
+      <width>501</width>
+      <height>651</height>
      </rect>
     </property>
    </widget>
+  </widget>
+  <widget class="QLabel" name="infoLabel">
+   <property name="geometry">
+    <rect>
+     <x>90</x>
+     <y>510</y>
+     <width>400</width>
+     <height>100</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>400</width>
+     <height>100</height>
+    </size>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>400</width>
+     <height>100</height>
+    </size>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="coverLabel">
+   <property name="geometry">
+    <rect>
+     <x>90</x>
+     <y>90</y>
+     <width>400</width>
+     <height>400</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>400</width>
+     <height>400</height>
+    </size>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>400</width>
+     <height>400</height>
+    </size>
+   </property>
+   <property name="styleSheet">
+    <string notr="true"/>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="startButton">
+   <property name="geometry">
+    <rect>
+     <x>290</x>
+     <y>630</y>
+     <width>201</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>GAME START</string>
+   </property>
   </widget>
  </widget>
  <resources/>
