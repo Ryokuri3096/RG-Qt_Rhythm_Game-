@@ -1,1 +1,0 @@
--I"F:/Qt/Projects/RG/build/Desktop_x86_windows_msys_pe_64bit-Debug/RG_autogen/include" -IF:/Qt/Projects/RG -isystem F:/Qt/6.11.0/mingw_64/include/QtCore -isystem F:/Qt/6.11.0/mingw_64/include -isystem "F:/Qt/6.11.0/mingw_64/mkspecs/win32-g++" -isystem F:/Qt/6.11.0/mingw_64/include/QtWidgets -isystem F:/Qt/6.11.0/mingw_64/include/QtGui
