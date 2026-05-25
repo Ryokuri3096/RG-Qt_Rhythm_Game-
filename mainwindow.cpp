@@ -1,10 +1,11 @@
 #include "mainwindow.h"
-#include "./ui_mainwindow.h"
-#include "songwindow.h"
+#include <QGraphicsDropShadowEffect>
 #include <QLayout>
 #include <QPropertyAnimation>
 #include <QPushButton>
-#include <QGraphicsDropShadowEffect>
+#include "./ui_mainwindow.h"
+#include "settingswindow.h"
+#include "songwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -19,39 +20,46 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+
 void MainWindow::on_playButton_clicked()
 {
     qDebug() << "playButton is clicked";
 
     this->hide(); //隐藏当前主窗口
-    SongWindow* songWin=new SongWindow();
+    SongWindow *songWin = new SongWindow();
 
-    songWin->setMainWindow(this); // 把主窗口指针传给选歌窗口
+    songWin->setMainWindow(this);        // 把主窗口指针传给选歌窗口
     songWin->setFixedSize(this->size()); //设置窗口大小与主窗口相同
     songWin->show();
+    //songWin->showMaximized();
 }
-
 
 void MainWindow::on_profileButton_clicked()
 {
     qDebug() << "profileButton is clicked";
 }
 
-
 void MainWindow::on_settingsButton_clicked()
 {
     qDebug() << "settingsButton is clicked";
-}
 
+    this->hide();
+    SettingsWindow *settingsWin = new SettingsWindow();
+
+    settingsWin->setMainWindow(this);
+    settingsWin->setFixedSize(this->size());
+    settingsWin->show();
+}
 
 void MainWindow::on_exitButton_clicked()
 {
     qApp->exit();
 }
 
-void MainWindow::displayShadowForButtons(){ //给按钮加上阴影的函数
+void MainWindow::displayShadowForButtons()
+{ //给按钮加上阴影的函数
     QGraphicsDropShadowEffect *shadow[4];
-    for(int i=0;i<4;i++){
+    for (int i = 0; i < 4; i++) {
         shadow[i] = new QGraphicsDropShadowEffect(this);
         shadow[i]->setBlurRadius(15);
         shadow[i]->setOffset(3, 3);

@@ -26,6 +26,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         res.qrc
         songwindow.h songwindow.cpp songwindow.ui
         playwindow.h playwindow.cpp playwindow.ui
+        settingswindow.h settingswindow.cpp settingswindow.ui
 
 
 

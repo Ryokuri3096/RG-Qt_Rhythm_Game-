@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SettingsWindow</class>
+ <widget class="QMainWindow" name="SettingsWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1280</width>
+    <height>720</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>设置</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="centralLayout">
+    <property name="spacing"><number>0</number></property>
+    <property name="leftMargin"><number>0</number></property>
+    <property name="topMargin"><number>0</number></property>
+    <property name="rightMargin"><number>0</number></property>
+    <property name="bottomMargin"><number>0</number></property>
+    <!-- 左上角返回按钮 -->
+    <item>
+     <layout class="QHBoxLayout" name="backBtnLayout">
+      <property name="leftMargin"><number>10</number></property>
+      <property name="topMargin"><number>10</number></property>
+      <item>
+       <widget class="QPushButton" name="backButton">
+        <property name="minimumSize"><size><width>150</width><height>50</height></size></property>
+        <property name="maximumSize"><size><width>150</width><height>50</height></size></property>
+        <property name="cursor"><cursorShape>PointingHandCursor</cursorShape></property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton {
+             color: white;
+             background: rgba(34, 34, 34, 204);
+             font-size: 14px;
+             border: none;
+             border-radius: 6px;
+             padding: 6px 14px;
+         }
+         QPushButton:hover {
+             background: rgba(255, 255, 255, 50);
+         }</string>
+        </property>
+        <property name="text"><string>&lt; 返回</string></property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="topRightSpacer">
+        <property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property>
+        <property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <spacer name="fillSpacer">
+      <property name="orientation"><enum>Qt::Orientation::Vertical</enum></property>
+      <property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property>
+     </spacer>
+    </item>
+   </layout>
+   <!-- 遮罩层：80%×80% 居中，.cpp resizeEvent 动态定位 -->
+   <widget class="QFrame" name="overlayFrame">
+    <property name="geometry"><rect><x>0</x><y>0</y><width>100</width><height>30</height></rect></property>
+    <property name="styleSheet">
+     <string notr="true">#overlayFrame { background-color: rgba(34, 34, 34, 204); border-radius: 8px; }</string>
+    </property>
+    <layout class="QHBoxLayout" name="overlayLayout">
+     <property name="spacing"><number>0</number></property>
+     <property name="leftMargin"><number>20</number></property>
+     <property name="topMargin"><number>20</number></property>
+     <property name="rightMargin"><number>20</number></property>
+     <property name="bottomMargin"><number>20</number></property>
+     <!-- ===== 左半区域：参数调节区（绝对坐标定位） ===== -->
+     <item>
+      <widget class="QWidget" name="leftPanel" native="true">
+       <!-- Row 1: 音乐音量 y=160 -->
+       <widget class="QLabel" name="musicVolumeLabel">
+        <property name="geometry"><rect><x>0</x><y>165</y><width>113</width><height>20</height></rect></property>
+        <property name="styleSheet"><string notr="true">color: white; font-size: 16px;</string></property>
+        <property name="text"><string>音乐音量</string></property>
+       </widget>
+       <widget class="QLabel" name="musicVolumeValueLabel">
+        <property name="geometry"><rect><x>129</x><y>165</y><width>55</width><height>20</height></rect></property>
+        <property name="styleSheet"><string notr="true">color: white; font-size: 16px;</string></property>
+        <property name="text"><string>0.50</string></property>
+        <property name="alignment"><set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignVCenter</set></property>
+       </widget>
+       <widget class="QPushButton" name="musicVolumeMinusBtn">
+        <property name="geometry"><rect><x>200</x><y>160</y><width>30</width><height>30</height></rect></property>
+        <property name="cursor"><cursorShape>PointingHandCursor</cursorShape></property>
+        <property name="text"><string>-</string></property>
+       </widget>
+       <widget class="QSlider" name="musicVolumeSlider">
+        <property name="geometry"><rect><x>246</x><y>165</y><width>180</width><height>20</height></rect></property>
+        <property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property>
+       </widget>
+       <widget class="QPushButton" name="musicVolumePlusBtn">
+        <property name="geometry"><rect><x>442</x><y>160</y><width>30</width><height>30</height></rect></property>
+        <property name="cursor"><cursorShape>PointingHandCursor</cursorShape></property>
+        <property name="text"><string>+</string></property>
+       </widget>
+       <!-- Row 2: 音效音量 y=210 -->
+       <widget class="QLabel" name="sfxVolumeLabel">
+        <property name="geometry"><rect><x>0</x><y>215</y><width>113</width><height>20</height></rect></property>
+        <property name="styleSheet"><string notr="true">color: white; font-size: 16px;</string></property>
+        <property name="text"><string>音效音量</string></property>
+       </widget>
+       <widget class="QLabel" name="sfxVolumeValueLabel">
+        <property name="geometry"><rect><x>129</x><y>215</y><width>55</width><height>20</height></rect></property>
+        <property name="styleSheet"><string notr="true">color: white; font-size: 16px;</string></property>
+        <property name="text"><string>0.50</string></property>
+        <property name="alignment"><set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignVCenter</set></property>
+       </widget>
+       <widget class="QPushButton" name="sfxVolumeMinusBtn">
+        <property name="geometry"><rect><x>200</x><y>210</y><width>30</width><height>30</height></rect></property>
+        <property name="cursor"><cursorShape>PointingHandCursor</cursorShape></property>
+        <property name="text"><string>-</string></property>
+       </widget>
+       <widget class="QSlider" name="sfxVolumeSlider">
+        <property name="geometry"><rect><x>246</x><y>215</y><width>180</width><height>20</height></rect></property>
+        <property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property>
+       </widget>
+       <widget class="QPushButton" name="sfxVolumePlusBtn">
+        <property name="geometry"><rect><x>442</x><y>210</y><width>30</width><height>30</height></rect></property>
+        <property name="cursor"><cursorShape>PointingHandCursor</cursorShape></property>
+        <property name="text"><string>+</string></property>
+       </widget>
+       <!-- Row 3: BGM音量 y=260 -->
+       <widget class="QLabel" name="bgmVolumeLabel">
+        <property name="geometry"><rect><x>0</x><y>265</y><width>113</width><height>20</height></rect></property>
+        <property name="styleSheet"><string notr="true">color: white; font-size: 16px;</string></property>
+        <property name="text"><string>BGM音量</string></property>
+       </widget>
+       <widget class="QLabel" name="bgmVolumeValueLabel">
+        <property name="geometry"><rect><x>129</x><y>265</y><width>55</width><height>20</height></rect></property>
+        <property name="styleSheet"><string notr="true">color: white; font-size: 16px;</string></property>
+        <property name="text"><string>0.50</string></property>
+        <property name="alignment"><set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignVCenter</set></property>
+       </widget>
+       <widget class="QPushButton" name="bgmVolumeMinusBtn">
+        <property name="geometry"><rect><x>200</x><y>260</y><width>30</width><height>30</height></rect></property>
+        <property name="cursor"><cursorShape>PointingHandCursor</cursorShape></property>
+        <property name="text"><string>-</string></property>
+       </widget>
+       <widget class="QSlider" name="bgmVolumeSlider">
+        <property name="geometry"><rect><x>246</x><y>265</y><width>180</width><height>20</height></rect></property>
+        <property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property>
+       </widget>
+       <widget class="QPushButton" name="bgmVolumePlusBtn">
+        <property name="geometry"><rect><x>442</x><y>260</y><width>30</width><height>30</height></rect></property>
+        <property name="cursor"><cursorShape>PointingHandCursor</cursorShape></property>
+        <property name="text"><string>+</string></property>
+       </widget>
+       <!-- Row 4: 谱面延时 y=310 -->
+       <widget class="QLabel" name="offsetLabel">
+        <property name="geometry"><rect><x>0</x><y>315</y><width>113</width><height>20</height></rect></property>
+        <property name="styleSheet"><string notr="true">color: white; font-size: 16px;</string></property>
+        <property name="text"><string>谱面延时</string></property>
+       </widget>
+       <widget class="QLabel" name="offsetValueLabel">
+        <property name="geometry"><rect><x>129</x><y>315</y><width>55</width><height>20</height></rect></property>
+        <property name="styleSheet"><string notr="true">color: white; font-size: 16px;</string></property>
+        <property name="text"><string>0 ms</string></property>
+        <property name="alignment"><set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignVCenter</set></property>
+       </widget>
+       <widget class="QPushButton" name="offsetMinusBtn">
+        <property name="geometry"><rect><x>200</x><y>310</y><width>30</width><height>30</height></rect></property>
+        <property name="cursor"><cursorShape>PointingHandCursor</cursorShape></property>
+        <property name="text"><string>-</string></property>
+       </widget>
+       <widget class="QSlider" name="offsetSlider">
+        <property name="geometry"><rect><x>246</x><y>315</y><width>180</width><height>20</height></rect></property>
+        <property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property>
+       </widget>
+       <widget class="QPushButton" name="offsetPlusBtn">
+        <property name="geometry"><rect><x>442</x><y>310</y><width>30</width><height>30</height></rect></property>
+        <property name="cursor"><cursorShape>PointingHandCursor</cursorShape></property>
+        <property name="text"><string>+</string></property>
+       </widget>
+       <!-- 提示文字：谱面延时下方15px，左对齐 -->
+       <widget class="QLabel" name="hintLabel">
+        <property name="geometry"><rect><x>0</x><y>355</y><width>472</width><height>18</height></rect></property>
+        <property name="styleSheet"><string notr="true">color: #aaaaaa; font-size: 12px;</string></property>
+        <property name="text"><string>* 调节谱面延时至蓝色滑块与白色判定线重合时声音同步</string></property>
+        <property name="alignment"><set>Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set></property>
+        <property name="wordWrap"><bool>true</bool></property>
+       </widget>
+      </widget>
+     </item>
+     <!-- ===== 右半区域：实时演示区 ===== -->
+     <item>
+      <widget class="QWidget" name="rightPanel" native="true">
+       <layout class="QVBoxLayout" name="rightPanelLayout">
+        <property name="spacing"><number>0</number></property>
+        <property name="leftMargin"><number>20</number></property>
+        <property name="rightMargin"><number>0</number></property>
+        <item>
+         <spacer name="rightTopSpacer">
+          <property name="orientation"><enum>Qt::Orientation::Vertical</enum></property>
+          <property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property>
+         </spacer>
+        </item>
+        <item>
+         <spacer name="rightBottomSpacer">
+          <property name="orientation"><enum>Qt::Orientation::Vertical</enum></property>
+          <property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

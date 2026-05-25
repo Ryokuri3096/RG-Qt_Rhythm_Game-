@@ -8,6 +8,17 @@ PlayWindow::PlayWindow(QWidget *parent)
     ui->setupUi(this);
 }
 
+void PlayWindow::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_F11) {
+        if (isFullScreen())
+            showNormal();
+        else
+            showFullScreen();
+    }
+    QMainWindow::keyPressEvent(event);
+}
+
 PlayWindow::~PlayWindow()
 {
     delete ui;

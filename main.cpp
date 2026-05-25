@@ -8,5 +8,6 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.resize(1280, 720);
     w.show();
+    //w.showMaximized();
     return QCoreApplication::exec();
 }

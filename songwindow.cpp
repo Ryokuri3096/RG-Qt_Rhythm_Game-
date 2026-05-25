@@ -1,6 +1,6 @@
 #include "songwindow.h"
-#include "ui_songwindow.h"
 #include "mainwindow.h"
+#include "ui_songwindow.h"
 
 SongWindow::SongWindow(QMainWindow *parent)
     : QMainWindow(parent)
@@ -26,7 +26,7 @@ void SongWindow::on_backButton_clicked()
         m_mainWin->show(); // 显示原来的主窗口
     }
 
-    this->close(); //关闭自己
+    this->close();       //关闭自己
     this->deleteLater(); // 安全释放自己
 }
 
@@ -55,8 +55,7 @@ void SongWindow::loadCharts()
     // 3. 递归遍历所有 .json 文件
     QStringList nameFilters;
     nameFilters << "*.json";
-    QDirIterator it(chartsRoot, nameFilters, QDir::Files,
-                    QDirIterator::Subdirectories);
+    QDirIterator it(chartsRoot, nameFilters, QDir::Files, QDirIterator::Subdirectories);
 
     QMap<QString, QJsonObject> chartData;
     while (it.hasNext()) {
@@ -69,16 +68,16 @@ void SongWindow::loadCharts()
         QMap<QString, QJsonObject> loadedData;
         QJsonObject jsonObj = loadJsonFile(absolutePath);
         if (jsonObj.isEmpty()) {
-            continue;    // 读取失败或格式错误，跳过该文件
+            continue; // 读取失败或格式错误，跳过该文件
         }
-        loadedData.insert(absolutePath, jsonObj);  // 保存数据
+        loadedData.insert(absolutePath, jsonObj); // 保存数据
 
         // ---- 从 JSON 中提取按钮文本 ----
         QJsonObject metaObj = jsonObj.value("meta").toObject();
         QJsonObject songObj = metaObj.value("song").toObject();
         QString btnText = songObj.value("title").toString();
         if (btnText.isEmpty()) {
-            btnText = relativePath;   // 如果 JSON 中没有 name，回退为相对路径
+            btnText = relativePath; // 如果 JSON 中没有 name，回退为相对路径
         }
 
         // 创建按钮 设置按钮样式
@@ -110,7 +109,7 @@ QJsonObject SongWindow::loadJsonFile(const QString &path)
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly)) {
         qWarning() << "Cannot open file:" << path;
-        return QJsonObject();   // 返回空对象表示失败
+        return QJsonObject(); // 返回空对象表示失败
     }
 
     QByteArray rawData = file.readAll();
@@ -155,7 +154,7 @@ void SongWindow::updateLeftPanel(const QString &jsonPath, const QJsonObject &jso
                                            Qt::SmoothTransformation));
         ui->coverLabel->setStyleSheet("border: 4px solid #360054;");
     } else {
-        coverLabel->setPixmap(QPixmap());   // 清空图片
+        coverLabel->setPixmap(QPixmap()); // 清空图片
     }
 
     // 2. 提取并显示歌曲信息
@@ -167,28 +166,24 @@ void SongWindow::updateLeftPanel(const QString &jsonPath, const QJsonObject &jso
     QString difficulty = songObj.value("difficulty").toString("?");
     // 可根据需要继续提取其他字段
 
-    QString infoHtml = QString(
-                           "<table width='100%' cellspacing='0' cellpadding='0' style='color:white;'>"
-                           "<tr>"
-                           // 左侧：歌曲标题与艺术家
-                           "<td valign='bottom' style='padding-right:10px;'>"
-                           "<b style='font-size:24px;'>%1</b><br>"
-                           "<span style='color:#ccc; font-size:14px;'>%2</span>"
-                           "</td>"
-                           // 右侧：难度
-                           "<td align='right' valign='bottom'>"
-                           "<span style='font-size:32px; font-weight:bold;'>Lv.%3</span>"
-                           "</td>"
-                           "</tr>"
-                           "</table>"
-                           ).arg(title, artist, difficulty);
+    QString infoHtml
+        = QString("<table width='100%' cellspacing='0' cellpadding='0' style='color:white;'>"
+                  "<tr>"
+                  // 左侧：歌曲标题与艺术家
+                  "<td valign='bottom' style='padding-right:10px;'>"
+                  "<b style='font-size:24px;'>%1</b><br>"
+                  "<span style='color:#ccc; font-size:14px;'>%2</span>"
+                  "</td>"
+                  // 右侧：难度
+                  "<td align='right' valign='bottom'>"
+                  "<span style='font-size:32px; font-weight:bold;'>Lv.%3</span>"
+                  "</td>"
+                  "</tr>"
+                  "</table>")
+              .arg(title, artist, difficulty);
 
     infoLabel->setText(infoHtml);
     infoLabel->setWordWrap(true);
 }
 
-void SongWindow::on_startButton_clicked()
-{
-
-}
-
+void SongWindow::on_startButton_clicked() {}

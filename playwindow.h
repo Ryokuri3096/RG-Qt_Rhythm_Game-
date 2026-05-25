@@ -1,6 +1,7 @@
 #ifndef PLAYWINDOW_H
 #define PLAYWINDOW_H
 
+#include <QKeyEvent>
 #include <QMainWindow>
 
 namespace Ui {
@@ -14,6 +15,9 @@ class PlayWindow : public QMainWindow
 public:
     explicit PlayWindow(QWidget *parent = nullptr);
     ~PlayWindow();
+
+protected:
+    void keyPressEvent(QKeyEvent *event) override;
 
 private:
     Ui::PlayWindow *ui;
