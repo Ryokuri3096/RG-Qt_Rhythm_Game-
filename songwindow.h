@@ -41,8 +41,9 @@ private slots:
 
 private:
     Ui::SongWindow *ui;
-    MainWindow *m_mainWin;
-    QMap<QString, QJsonObject> m_chartData; // 存储每个文件的 JSON 数据
+    MainWindow* m_mainWin;
+    QMap<QString, QJsonObject> m_chartData;  // 存储每个文件的 JSON 数据
+    QString songPath;
 
     void loadCharts();
     QJsonObject loadJsonFile(const QString &path);  // 读取.json文件信息的函数
