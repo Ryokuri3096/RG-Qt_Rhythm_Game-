@@ -11,6 +11,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Multimedia)
 
 set(PROJECT_SOURCES
         main.cpp
@@ -26,6 +27,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         res.qrc
         songwindow.h songwindow.cpp songwindow.ui
         playwindow.h playwindow.cpp playwindow.ui
+        gamemanager.h gamemanager.cpp
 
 
 
@@ -49,6 +51,7 @@ else()
 endif()
 
 target_link_libraries(RG PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(RG PRIVATE Qt6::Multimedia)
 target_include_directories(RG PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}   # 因为 mywidget.h 在项目根目录
 )

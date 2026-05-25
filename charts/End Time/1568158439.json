@@ -2,7 +2,7 @@
   "meta": {
     "$ver": 0,
     "creator": "mir-kirby",
-    "background": "tmp.jpg",
+    "background": "End_time.png",
     "version": "4K Lv.27",
     "id": 47679,
     "mode": 0,
@@ -4268,7 +4268,7 @@
     },
     {
       "beat": [ 0, 0, 1 ],
-      "sound": "item.ogg",
+      "sound": "1568158439.ogg",
       "vol": 48,
       "offset": 2000,
       "type": 1

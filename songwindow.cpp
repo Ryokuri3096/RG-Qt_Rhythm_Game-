@@ -1,6 +1,9 @@
 #include "songwindow.h"
+#include "ui_playwindow.h"
 #include "ui_songwindow.h"
 #include "mainwindow.h"
+#include "playwindow.h"
+#include "gamemanager.h"
 
 SongWindow::SongWindow(QMainWindow *parent)
     : QMainWindow(parent)
@@ -38,7 +41,7 @@ void SongWindow::setMainWindow(MainWindow *win)
 
 void SongWindow::loadCharts()
 {
-    // 1. 确定 charts 根目录（与 exe 同级）
+    // 确定 charts 根目录
     QString chartsRoot = QCoreApplication::applicationDirPath() + "/charts";
     QDir rootDir(chartsRoot);
     if (!rootDir.exists()) {
@@ -46,13 +49,13 @@ void SongWindow::loadCharts()
         return;
     }
 
-    // 2. 准备容器和布局
+    // 准备容器和布局
     QWidget *container = new QWidget();
     QVBoxLayout *layout = new QVBoxLayout(container);
     layout->setContentsMargins(5, 5, 5, 5);
     layout->setSpacing(4);
 
-    // 3. 递归遍历所有 .json 文件
+    // 递归遍历所有 .json 文件
     QStringList nameFilters;
     nameFilters << "*.json";
     QDirIterator it(chartsRoot, nameFilters, QDir::Files,
@@ -73,7 +76,7 @@ void SongWindow::loadCharts()
         }
         loadedData.insert(absolutePath, jsonObj);  // 保存数据
 
-        // ---- 从 JSON 中提取按钮文本 ----
+        // 从 JSON 中提取按钮文本
         QJsonObject metaObj = jsonObj.value("meta").toObject();
         QJsonObject songObj = metaObj.value("song").toObject();
         QString btnText = songObj.value("title").toString();
@@ -86,21 +89,21 @@ void SongWindow::loadCharts()
         btn->setMinimumHeight(100);
         // btn->setStyleSheet(R"(QPushButton:hover {border: 1px solid #5078a0;border-radius: 2px;})");
 
-        // 连接点击信号（示例：打印绝对路径）
+        // 连接点击信号
         connect(btn, &QPushButton::clicked, this, [this, absolutePath, btnText, jsonObj]() {
             qDebug() << "Clicked:" << btnText;
             updateLeftPanel(absolutePath, jsonObj);
             ui->startButton->show();
-            // 在这里可以打开文件、加载图表等
+            songPath = absolutePath;
         });
 
         layout->addWidget(btn);
     }
 
-    // 加个弹簧，按钮不会拉伸占满
+    // 加个弹簧 按钮不会拉伸占满
     layout->addStretch();
 
-    // 4. 设置到 QScrollArea
+    // 设置到 QScrollArea
     ui->chooseArea->setWidgetResizable(true);
     ui->chooseArea->setWidget(container);
 }
@@ -170,12 +173,12 @@ void SongWindow::updateLeftPanel(const QString &jsonPath, const QJsonObject &jso
     QString infoHtml = QString(
                            "<table width='100%' cellspacing='0' cellpadding='0' style='color:white;'>"
                            "<tr>"
-                           // 左侧：歌曲标题与艺术家
+                           // 左侧 歌曲标题与艺术家
                            "<td valign='bottom' style='padding-right:10px;'>"
                            "<b style='font-size:24px;'>%1</b><br>"
                            "<span style='color:#ccc; font-size:14px;'>%2</span>"
                            "</td>"
-                           // 右侧：难度
+                           // 右侧 难度
                            "<td align='right' valign='bottom'>"
                            "<span style='font-size:32px; font-weight:bold;'>Lv.%3</span>"
                            "</td>"
@@ -189,6 +192,30 @@ void SongWindow::updateLeftPanel(const QString &jsonPath, const QJsonObject &jso
 
 void SongWindow::on_startButton_clicked()
 {
+    // 创建游戏管理器
+    GameManager *gameManager = new GameManager(this);
+    gameManager->reset();
 
+    // 创建游戏窗口
+    PlayWindow *play = new PlayWindow;
+    play->loadChart(songPath, *gameManager);
+
+    // 连接判定信号
+    connect(play, &PlayWindow::judgement, gameManager, &GameManager::onJudgement);
+
+    // 连接UI更新信号
+    connect(gameManager, &GameManager::scoreChanged, this, [this, play](int score) {
+        play->getUI()->labelScore->setText(QString("Score: %1").arg(score));
+        });
+    connect(gameManager, &GameManager::comboChanged, this, [this, play](int combo) {
+        play->getUI()->labelCombo->setText(QString("Combo: %1").arg(combo));
+        });
+    connect(gameManager, &GameManager::judgementResult, this, [this, play](const QString &text, const QColor &color) {
+        play->getUI()->labelJudgement->setText(text);
+        play->getUI()->labelJudgement->setStyleSheet(QString("color: %1; font-size: 28px;").arg(color.name()));
+        });
+
+    play->show();
+    this->hide();
+    QTimer::singleShot(2000, play, &PlayWindow::startGame); // 等待2s再开始游戏
 }
-
