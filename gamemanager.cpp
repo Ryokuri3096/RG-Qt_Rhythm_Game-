@@ -14,6 +14,11 @@ void GameManager::reset()
     m_greatCount = 0;
     m_goodCount = 0;
     m_missCount = 0;
+    m_accuracy = 0;
+
+    emit scoreChanged(m_score);
+    emit comboChanged(m_combo);
+    emit accuracyChanged(m_accuracy);
 }
 
 void GameManager::onJudgement(int diffMs)
@@ -55,6 +60,7 @@ void GameManager::onJudgement(int diffMs)
     }
 
     m_score += score;
+    m_accuracy = (double) 100 * (m_allNoteNum - m_greatCount * 0.25 - m_goodCount * 0.5 - m_missCount) / m_allNoteNum;
 
     if (m_combo > m_maxCombo) {
         m_maxCombo = m_combo;
@@ -62,5 +68,6 @@ void GameManager::onJudgement(int diffMs)
 
     emit scoreChanged(m_score);
     emit comboChanged(m_combo);
+    emit accuracyChanged(m_accuracy);
     emit judgementResult(text, color);
 }

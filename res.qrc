@@ -4,5 +4,10 @@
         <file>img/Play.png</file>
         <file>img/Profile.jpg</file>
         <file>img/Settings.jpg</file>
+        <file>fonts/Exo.ttf</file>
+        <file>fonts/Exo-Regular.otf</file>
+        <file>fonts/GeosansLight-1.ttf</file>
+        <file>fonts/GeosansLight-Oblique-2.ttf</file>
+        <file>fonts/Kazesawa-Regular.ttf</file>
     </qresource>
 </RCC>

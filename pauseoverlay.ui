@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PauseOverlay</class>
+ <widget class="QWidget" name="PauseOverlay">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>200</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: rgba(0, 0, 0, 200);</string>
+  </property>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>381</width>
+     <height>81</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>GeosansLight</family>
+     <pointsize>24</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font-family: &quot;GeosansLight&quot;;
+background-color: rgba(0, 0, 0, 200);</string>
+   </property>
+   <property name="text">
+    <string>Paused</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignmentFlag::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QWidget" name="horizontalLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>100</y>
+     <width>381</width>
+     <height>81</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="QPushButton" name="resumeBtn">
+      <property name="font">
+       <font>
+        <family>Kazesawa</family>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">font-family: &quot;Kazesawa&quot;;</string>
+      </property>
+      <property name="text">
+       <string>Resume</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="restartBtn">
+      <property name="font">
+       <font>
+        <family>Kazesawa</family>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">font-family: &quot;Kazesawa&quot;;</string>
+      </property>
+      <property name="text">
+       <string>Restart</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="backBtn">
+      <property name="font">
+       <font>
+        <family>Kazesawa</family>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">font-family: &quot;Kazesawa&quot;;</string>
+      </property>
+      <property name="text">
+       <string>Back</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

@@ -210,12 +210,27 @@ void SongWindow::on_startButton_clicked()
     connect(gameManager, &GameManager::comboChanged, this, [this, play](int combo) {
         play->getUI()->labelCombo->setText(QString("Combo: %1").arg(combo));
         });
+    connect(gameManager, &GameManager::accuracyChanged, this, [this, play](double accuracy) {
+        play->getUI()->labelAccuracy->setText(QString("Accuracy: %1%").arg(QString::number(accuracy, 'f', 4)));
+    });
     connect(gameManager, &GameManager::judgementResult, this, [this, play](const QString &text, const QColor &color) {
         play->getUI()->labelJudgement->setText(text);
-        play->getUI()->labelJudgement->setStyleSheet(QString("color: %1; font-size: 28px;").arg(color.name()));
+        play->getUI()->labelJudgement->setStyleSheet(QString("color: %1; font-size: 28px; font-family: Kazesawa;").arg(color.name()));
         });
+
+    // 连接Restart信号
+    connect(play, &PlayWindow::restartRequested, gameManager, &GameManager::reset);
+
+    // 连接游戏结束
+    connect(play, &PlayWindow::gameFinished, this, [this, play, gameManager]() {
+        QTimer::singleShot(2000, this, [play, gameManager]() {
+            play->showResult(gameManager);   // 直接在 play 上显示覆盖层
+        });
+    });
 
     play->show();
     this->hide();
+
+    connect(play, &PlayWindow::returnToMenu, this, &QWidget::show);
     QTimer::singleShot(2000, play, &PlayWindow::startGame); // 等待2s再开始游戏
 }

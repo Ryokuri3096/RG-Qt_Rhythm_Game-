@@ -28,6 +28,11 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         songwindow.h songwindow.cpp songwindow.ui
         playwindow.h playwindow.cpp playwindow.ui
         gamemanager.h gamemanager.cpp
+        resultoverlay.h resultoverlay.cpp resultoverlay.ui
+        pauseoverlay.h pauseoverlay.cpp pauseoverlay.ui
+
+
+
 
 
 
