@@ -36,7 +36,7 @@ void ResultOverlay::setupUI(GameManager *gm, const QString &songTitle,
                                    "<span style='color:rgb(255,0,127);'>Great: %4</span><br>"
                                    "<span style='color:rgb(169,219,140);'>Good: %5</span><br>"
                                    "<span style='color:gray;'>Miss: %6</span><br>"
-                                   "<span style='color:white;'>Accuracy: %7</span><br>"
+                                   "<span style='color:white;'>Accuracy: %7%</span><br>"
                                    ).arg(gm->score()).arg(gm->maxCombo()).arg(gm->perfectCount()).arg(gm->greatCount())
         .arg(gm->goodCount()).arg(gm->missCount()).arg(QString::number(gm->accuracy(), 'f', 4)));
 }

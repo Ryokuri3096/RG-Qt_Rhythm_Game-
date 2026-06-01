@@ -95,6 +95,15 @@ QScrollArea:hover {
      <height>100</height>
     </size>
    </property>
+   <property name="font">
+    <font>
+     <family>Kazesawa</family>
+     <pointsize>14</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font-family:&quot;Kazesawa&quot;;</string>
+   </property>
    <property name="text">
     <string/>
    </property>

@@ -42,6 +42,7 @@ public:
     void startGame();
     void setFps(int fps); // 60 或 120
     int fps() const;
+    void updateEffects();
 
     void togglePause(); // 切换暂停/恢复
     void restartGame(); // 重新开始
@@ -83,6 +84,13 @@ private:
         bool holding = false;
     };
 
+    struct HitEffect { // 特效结构体
+        int lane;
+        QColor color;
+        qint64 startTime; // 当前音乐时间（ms）
+        static constexpr int duration = 300; // 持续 300ms
+    };
+
     // 谱面数据
     std::vector<GameNote> m_notes;
     double m_bpm = 130.0; // 乐曲bpm
@@ -101,6 +109,7 @@ private:
     int m_fps = 120; // 帧率 默认120
     bool m_gameEnded = false; // 记录游戏是否结束 防止重复发射
     bool m_showResult = false; // 是否处于结算前清理状态
+    QList<HitEffect> m_effects; // 打击特效
 
     // 暂停相关
     bool m_paused = false;
@@ -130,6 +139,9 @@ private:
     void checkFlickHit(int deltaY);
     void updateMissedNotes();
     qint64 currentMusicTime() const;
+    QColor judgementColor(int diffMs);
+    int laneX(int lane) const ;
+    int laneWidth(int lane) const ;
 
     void pauseGame();
     void resumeGame();

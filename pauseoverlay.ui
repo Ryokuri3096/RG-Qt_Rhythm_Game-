@@ -61,7 +61,7 @@ background-color: rgba(0, 0, 0, 200);</string>
        </font>
       </property>
       <property name="styleSheet">
-       <string notr="true">font-family: &quot;Kazesawa&quot;;</string>
+       <string notr="true"/>
       </property>
       <property name="text">
        <string>Resume</string>
@@ -77,7 +77,7 @@ background-color: rgba(0, 0, 0, 200);</string>
        </font>
       </property>
       <property name="styleSheet">
-       <string notr="true">font-family: &quot;Kazesawa&quot;;</string>
+       <string notr="true"/>
       </property>
       <property name="text">
        <string>Restart</string>
@@ -93,7 +93,7 @@ background-color: rgba(0, 0, 0, 200);</string>
        </font>
       </property>
       <property name="styleSheet">
-       <string notr="true">font-family: &quot;Kazesawa&quot;;</string>
+       <string notr="true"/>
       </property>
       <property name="text">
        <string>Back</string>

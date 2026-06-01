@@ -44,10 +44,12 @@ void PlayWindow::loadChart(const QString &chartPath, GameManager &gameManager)
     QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
     QJsonObject root = doc.object();
 
-    // 获取曲绘 乐曲名 作者 难度
+    // 获取曲绘 乐曲名 作者 难度并显示
     QJsonObject meta = root["meta"].toObject();
     m_songTitle = meta["song"].toObject()["title"].toString();
     m_songArtist = meta["song"].toObject()["artist"].toString();
+    ui->labelTitle->setText(m_songTitle + " / " +m_songArtist);
+    ui->labelTitle->hide();
     m_difficulty = meta["version"].toString();
     QString bgFile = meta["background"].toString();
     m_coverPath = QFileInfo(chartPath).absolutePath() + "/" + bgFile;
@@ -185,6 +187,7 @@ void PlayWindow::gameLoop()
         }
     }
 
+    updateEffects();
     updateMissedNotes(); // 判定应该miss的note
 
     update(); // 重绘
@@ -306,6 +309,30 @@ void PlayWindow::paintEvent(QPaintEvent *)
         }
         }
     }
+
+    // 绘制打击特效
+    for (const auto &e : m_effects) {
+        qint64 elapsed = curTime - e.startTime;
+        if (elapsed < 0 || elapsed > HitEffect::duration) continue;
+
+        float progress = (float)elapsed / HitEffect::duration;
+        float expand = 1.0f + progress; // 扩大倍数
+        int alpha = 255 * (1.0f - progress);
+
+        int x = laneX(e.lane); // 之前定义过的轨道坐标辅助函数
+        int w = laneWidth(e.lane);
+        int h = 18 + 2; // 音符高度为18
+
+        QRectF baseRect(x + 4, m_hitLineY - h/2, w, h);
+        QRectF expandedRect = baseRect.adjusted(-w*(expand-1)/2, -h*(expand-1)/2,
+                                                w*(expand-1)/2, h*(expand-1)/2);
+        QColor penColor = e.color;
+        penColor.setAlpha(alpha);
+        QPen pen(penColor, 3); // 颜色与画笔粗细
+        p.setPen(pen);
+        p.setBrush(Qt::NoBrush);
+        p.drawRect(expandedRect);
+    }
 }
 
 void PlayWindow::keyPressEvent(QKeyEvent *event)
@@ -366,6 +393,8 @@ void PlayWindow::checkTapHit(int lane)
         } else {
             bestNote->judged = true;
         }
+        QColor col = judgementColor(minDiff);
+        m_effects.append({bestNote->data.lane, col, currentMusicTime()});
         emit judgement(minDiff); // 发出判定信号
     }
 }
@@ -417,8 +446,11 @@ void PlayWindow::checkFlickHit(int deltaY)
     if (bestNote) {
         bestNote->judged = true;
         m_activeFlickLanes.remove(bestNote->data.lane);
-        if (minDiff <= 200) // 如果在200ms内滑动则判定为Perfect 否则不判定
+        if (minDiff <= 200) { // 如果在200ms内滑动则判定为Perfect 否则不判定
+            QColor col = judgementColor(0);
+            m_effects.append({bestNote->data.lane, col, currentMusicTime()});
             emit judgement(0);
+        }
     }
 }
 
@@ -607,4 +639,35 @@ void PlayWindow::restartGame()
     ui->labelJudgement->clear(); // 清除判定文字 否则会显示MISS
 
     emit restartRequested(); // 通知外部重置 GameManager
+}
+
+QColor PlayWindow::judgementColor(int diffMs) {
+    if (diffMs == 999) return Qt::red; // Miss
+    if (diffMs <= 50)  return QColor(255,215,0); // Perfect
+    if (diffMs <= 100) return QColor("#FF1493"); // Great
+    if (diffMs <= 150) return Qt::green; // Good
+    return Qt::red; // 超出也当 Miss
+}
+
+void PlayWindow::updateEffects() {
+    qint64 curTime = currentMusicTime();
+    m_effects.erase(
+        std::remove_if(m_effects.begin(), m_effects.end(),
+                       [curTime](const HitEffect &e) {
+                           return curTime - e.startTime > HitEffect::duration;
+                       }),
+        m_effects.end());
+}
+
+int PlayWindow::laneX(int lane) const {
+    const int leftLaneW = 80;
+    const int rightLaneW = 160;
+    const int totalW = 4 * leftLaneW + rightLaneW;
+    const int offsetX = (width() - totalW) / 2;
+    if (lane < 4) return offsetX + lane * leftLaneW;
+    else return offsetX + 4 * leftLaneW;
+}
+
+int PlayWindow::laneWidth(int lane) const {
+    return (lane < 4) ? 80 - 8 : 160 - 8; // 减去边距，保持与音符大小一致
 }
