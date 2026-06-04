@@ -9,7 +9,7 @@ ResultOverlay::ResultOverlay(GameManager *gm, const QString &songTitle,
 {
     ui->setupUi(this);
 
-    setStyleSheet("background-color: rgba(0, 0, 0, 200);");
+    // setStyleSheet("background-color: rgba(0, 0, 0, 200);");
     setupUI(gm, songTitle, artist, cover, difficulty);
 }
 

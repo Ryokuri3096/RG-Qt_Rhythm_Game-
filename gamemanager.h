@@ -28,7 +28,7 @@ signals:
     void scoreChanged(int score);
     void comboChanged(int combo);
     void accuracyChanged(double accuracy);
-    void judgementResult(const QString &text, const QColor &color);
+    void judgementResult(const QString &text, GameManager *gm);
 
 public slots:
     // 接受PlayWindow发射的信号 处理音符判定 999表示miss

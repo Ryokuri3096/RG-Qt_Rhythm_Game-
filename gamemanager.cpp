@@ -69,5 +69,5 @@ void GameManager::onJudgement(int diffMs)
     emit scoreChanged(m_score);
     emit comboChanged(m_combo);
     emit accuracyChanged(m_accuracy);
-    emit judgementResult(text, color);
+    emit judgementResult(text, this);
 }

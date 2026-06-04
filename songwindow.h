@@ -16,6 +16,7 @@
 #include <QVector>
 #include <QWidget>
 #include "qmainwindow.h"
+#include "playwindow.h"
 
 class MainWindow;
 
@@ -49,6 +50,7 @@ private:
     QJsonObject loadJsonFile(const QString &path);  // 读取.json文件信息的函数
     QString findCoverImage(const QString &dirPath); // 查找目录下的封面图片
     void updateLeftPanel(const QString &jsonPath, const QJsonObject &jsonObj); // 更新左侧显示
+    void judgementManage(PlayWindow *play, const QString &text, GameManager *gm);
     QScrollArea *scrollArea;
     QVector<QPushButton *> buttons;
 };

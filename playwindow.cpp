@@ -25,6 +25,8 @@ PlayWindow::PlayWindow(QWidget *parent)
 
     m_gameTimer = new QTimer(this); // 循环定时器
     connect(m_gameTimer, &QTimer::timeout, this, &PlayWindow::gameLoop);
+
+    m_judgementOrigin = ui->labelJudgement->pos();
 }
 
 PlayWindow::~PlayWindow()
@@ -39,6 +41,8 @@ Ui::PlayWindow *PlayWindow::getUI()
 
 void PlayWindow::loadChart(const QString &chartPath, GameManager &gameManager)
 {
+    loadGui();
+
     m_chartPath = chartPath; // 保存谱面路径，用于结算时生成 songId
     QFile file(chartPath); // 打开谱面文件
     if (!file.open(QIODevice::ReadOnly)) {
@@ -47,6 +51,11 @@ void PlayWindow::loadChart(const QString &chartPath, GameManager &gameManager)
     }
     QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
     QJsonObject root = doc.object();
+
+    m_tapBlue.load(":/img/note_blue.png");
+    m_holdBodyBlue.load(":/img/hold_blue.png");
+    m_tapRed.load(":/img/note_red.png");
+    m_holdBodyRed.load(":/img/hold_red.png");
 
     // 获取曲绘 乐曲名 作者 难度并显示
     QJsonObject meta = root["meta"].toObject();
@@ -187,6 +196,7 @@ void PlayWindow::startGame()
         note.holding = false;
         note.judged = false;
     }
+
     m_activeHolds.clear();
     m_activeFlickLanes.clear();
     m_lastMousePos = mapFromGlobal(QCursor::pos());
@@ -229,8 +239,8 @@ void PlayWindow::paintEvent(QPaintEvent *)
     p.setRenderHint(QPainter::Antialiasing, false);
 
     if (m_showResult) {
-        // 只填背景，不画任何游戏内容
-        p.fillRect(rect(), QColor(20, 20, 30)); // 深色背景，可自定义
+        // 只填背景
+        p.fillRect(rect(), QColor(20, 20, 30));
         return;
     }
 
@@ -248,8 +258,17 @@ void PlayWindow::paintEvent(QPaintEvent *)
     qint64 curTime = currentMusicTime();
     double speed = m_baseSpeed * m_speedFactor; // 像素/毫秒
 
-    // 绘制轨道线（5条竖线，分隔6条边）
-    p.setPen(QPen(QColor(80, 80, 80), 1));
+    // 绘制轨道背景
+    QColor lane01Color(0, 21, 35);
+    p.fillRect(QRect(offsetX, 0, leftLaneW * 2, h), lane01Color);
+    QColor lane23Color(39, 0, 23);
+    p.fillRect(QRect(offsetX + leftLaneW * 2, 0, leftLaneW * 2, h), lane23Color);
+    QColor lane4Color(59, 14, 14);
+    p.fillRect(QRect(offsetX + leftLaneW * 4, 0, rightLaneW, h), lane4Color);
+    p.fillRect(QRect(offsetX, m_hitLineY, leftLaneW * 6, h), QColor(39, 39, 39));
+
+    // 绘制轨道线
+    p.setPen(QPen(QColor(255, 255, 255, 80), 3));
     for (int i = 0; i <= 4; ++i) {
         int x = offsetX + i * leftLaneW;
         p.drawLine(x, 0, x, h);
@@ -291,47 +310,26 @@ void PlayWindow::paintEvent(QPaintEvent *)
 
         switch (note.data.type) {
         case NoteData::TAP: {
-            QRectF rect(x + 4, noteY, noteW, 18);
-            p.fillRect(rect, QColor(0, 200, 255));
+            QPixmap pic = tapPixmap(note.data.lane);
+            QPixmap scaled = pic.scaled(noteW, 20, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+            p.drawPixmap(x + 4, noteY, scaled);
             break;
         }
         case NoteData::HOLD: {
-            if (note.holding) {
-                // 按住状态
-                int headY = m_hitLineY; // 头部固定在判定线
+            if (note.holding) { // 按住
+                int headY = m_hitLineY;
                 double endYOffset = (note.data.endTimeMs - curTime) * speed;
-                int endY = m_hitLineY - (int)endYOffset; // 结束时间对应的 Y
-
-                // 绘制身体
-                int bodyTop = qMax(endY, -50);
-                int bodyBottom = m_hitLineY;
-                if (bodyTop < bodyBottom) {
-                    QRectF bodyRect(x + 4, bodyTop, noteW, bodyBottom - bodyTop);
-                    p.fillRect(bodyRect, QColor(255, 200, 0, 200));
-                }
-                // 绘制头部
-                p.fillRect(QRectF(x + 4, headY - 9, noteW, 18), QColor(255, 255, 0));
+                int endY = m_hitLineY - (int)endYOffset;
+                drawHold(p, note.data.lane, x, noteW, headY, endY, true);
             }
-            else {
-                // 未按住状态
+            else { // 未按住
                 int endY = m_hitLineY - (int)((note.data.endTimeMs - curTime) * speed);
-                int bodyTop = qMin(noteY, endY);
-                int bodyBottom = qMax(noteY, endY);
-                int visibleTop = qMax(bodyTop, -50);
-                int visibleBottom = qMin(bodyBottom, height() + 50);
-                if (visibleBottom > visibleTop) {
-                    QRectF bodyRect(x + 4, visibleTop, noteW, visibleBottom - visibleTop);
-                    p.fillRect(bodyRect, QColor(255, 200, 0, 200));
-                }
-                // 头部
-                if (noteY >= -50 && noteY <= height() + 50) {
-                    p.fillRect(QRectF(x + 4, noteY, noteW, 18), QColor(255, 255, 0));
-                }
+                drawHold(p, note.data.lane, x, noteW, noteY, endY, false);
             }
             break;
         }
         case NoteData::FLICK: {
-            QRectF rect(x + 4, noteY, noteW, 18);
+            QRectF rect(x + 4, noteY, noteW, 20);
             p.fillRect(rect, QColor(200, 0, 200));
             p.setPen(Qt::white);
             p.drawText(rect, Qt::AlignCenter, "↕");
@@ -562,6 +560,11 @@ void PlayWindow::showResult(GameManager *gm)
     ui->labelCombo->hide();
     ui->labelAccuracy->hide();
     ui->labelJudgement->hide();
+    ui->label->hide();
+    ui->label_2->hide();
+    ui->labelDiff->hide();
+    ui->labelJudgetext->hide();
+    ui->labelNote->hide();
 
     // 加载曲绘（如果失败就用空图）
     QPixmap cover;
@@ -711,6 +714,8 @@ void PlayWindow::resumeGame()
 
 void PlayWindow::restartGame()
 {
+    loadGui();
+
     // 重置所有音符状态
     for (auto &note : m_notes) {
         note.judged = false;
@@ -741,9 +746,9 @@ void PlayWindow::restartGame()
 
 QColor PlayWindow::judgementColor(int diffMs) {
     if (diffMs == 999) return Qt::red; // Miss
-    if (diffMs <= 50)  return QColor(255,215,0); // Perfect
-    if (diffMs <= 100) return QColor("#FF1493"); // Great
-    if (diffMs <= 150) return Qt::green; // Good
+    if (diffMs <= 70)  return QColor(255,215,0); // Perfect
+    if (diffMs <= 110) return QColor("#FF1493"); // Great
+    if (diffMs <= 200) return Qt::green; // Good
     return Qt::red; // 超出也当 Miss
 }
 
@@ -768,4 +773,95 @@ int PlayWindow::laneX(int lane) const {
 
 int PlayWindow::laneWidth(int lane) const {
     return (lane < 4) ? 80 - 8 : 160 - 8; // 减去边距，保持与音符大小一致
+}
+
+void PlayWindow::loadGui()
+{
+    ui->labelAccuracy->setText(QString("100.0000%"));
+    ui->labelCombo->setText(QString("<span style='font-size: 22px; color: white;'>Combo</span><br>"));
+    ui->labelJudgement->clear();
+    ui->labelScore->setText(QString("0"));
+    ui->labelJudgetext->setText(QString("<span style='color:white;'>MaxCombo</span><br>"
+                                        "<span style='color:rgb(255,215,0);'>Perfect</span><br>"
+                                        "<span style='color:rgb(255,0,127);'>Great</span><br>"
+                                        "<span style='color:rgb(169,219,140);'>Good</span><br>"
+                                        "<span style='color:gray;'>Miss</span>"));
+    ui->labelNote->setText(QString("<span style='color:white;'>0</span><br>"
+                                   "<span style='color:white;'>0</span><br>"
+                                   "<span style='color:white;'>0</span><br>"
+                                   "<span style='color:white;'>0</span><br>"
+                                   "<span style='color:white;'>0</span>"));
+    ui->labelDiff->setText(QString("Lv." + m_difficulty));
+}
+
+void PlayWindow::shakeLabelJudgement()
+{
+    // 停止并销毁之前的动画组
+    if (m_judgeAnimGroup) {
+        m_judgeAnimGroup->stop();
+        delete m_judgeAnimGroup;
+        m_judgeAnimGroup = nullptr;
+    }
+
+    if (m_judgementOrigin == QPoint(0, 0)) {
+        m_judgementOrigin = ui->labelJudgement->pos();
+    }
+    // 强制复位到原点
+    ui->labelJudgement->move(m_judgementOrigin);
+
+    int jumpHeight = 15; // 弹跳高度
+    // 向下移动
+    auto *down = new QPropertyAnimation(ui->labelJudgement, "pos");
+    down->setDuration(80);
+    down->setStartValue(m_judgementOrigin);
+    down->setEndValue(m_judgementOrigin + QPoint(0, jumpHeight));
+    down->setEasingCurve(QEasingCurve::OutQuad);
+
+    // 弹回原位
+    auto *up = new QPropertyAnimation(ui->labelJudgement, "pos");
+    up->setDuration(120);
+    up->setStartValue(m_judgementOrigin + QPoint(0, jumpHeight));
+    up->setEndValue(m_judgementOrigin);
+    up->setEasingCurve(QEasingCurve::OutBounce);
+
+    m_judgeAnimGroup = new QSequentialAnimationGroup(this);
+    m_judgeAnimGroup->addAnimation(down);
+    m_judgeAnimGroup->addAnimation(up);
+    m_judgeAnimGroup->start();
+}
+
+QPixmap PlayWindow::tapPixmap(int lane) const {
+    return (lane <= 1) ? m_tapBlue : m_tapRed;
+}
+
+QPixmap PlayWindow::holdBodyPixmap(int lane) const {
+    return (lane <= 1) ? m_holdBodyBlue : m_holdBodyRed;
+}
+
+void PlayWindow::drawHold(QPainter &p, int lane, int x, int noteW, int topY, int bottomY, bool headFixed) {
+    const int headH = 20; // 头/尾高度
+
+    QPixmap tap = tapPixmap(lane);
+    QPixmap body = holdBodyPixmap(lane);
+
+    int actualTop = qMin(topY, bottomY);
+    int actualBottom = qMax(topY, bottomY);
+    int bodyTop = actualTop + headH;
+    int bodyBottom = actualBottom - headH;
+
+    // 绘制身体
+    if (bodyBottom > bodyTop) {
+        int bodyH = bodyBottom - bodyTop;
+        QPixmap scaledBody = body.scaled(noteW, bodyH, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        p.drawPixmap(x + 4, bodyTop, scaledBody);
+    }
+
+    // 绘制头部
+    QPixmap scaledHead = tap.scaled(noteW, headH, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    p.drawPixmap(x + 4, actualTop, scaledHead);
+
+    // 绘制尾部
+    if (actualBottom - actualTop > headH) {  // 避免完全重叠时画两次
+        p.drawPixmap(x + 4, actualBottom - headH, scaledHead);
+    }
 }

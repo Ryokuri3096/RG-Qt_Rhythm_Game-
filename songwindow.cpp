@@ -204,24 +204,17 @@ void SongWindow::on_startButton_clicked()
 
     // 连接UI更新信号
     connect(gameManager, &GameManager::scoreChanged, this, [this, play](int score) {
-        play->getUI()->labelScore->setText(QString("Score: %1").arg(score));
+        play->getUI()->labelScore->setText(QString("%1").arg(score));
         });
     connect(gameManager, &GameManager::comboChanged, this, [this, play](int combo) {
-        play->getUI()->labelCombo->setText(QString("Combo: %1").arg(combo));
+        play->getUI()->labelCombo->setText(QString("<span style='font-size: 22px; color: white;'>Combo</span><br>"
+                                                   "<span style='font-size: 32px; color: white;'>%1</span>").arg(combo));
         });
     connect(gameManager, &GameManager::accuracyChanged, this, [this, play](double accuracy) {
-        play->getUI()->labelAccuracy->setText(QString("Accuracy: %1%").arg(QString::number(accuracy, 'f', 4)));
+        play->getUI()->labelAccuracy->setText(QString("%1%").arg(QString::number(accuracy, 'f', 4)));
         });
-    connect(gameManager, &GameManager::judgementResult, this, [this, play](const QString &text, const QColor &color) {
-        play->getUI()->labelJudgement->setText(text);
-        if (text == "PERFECT")
-            play->getUI()->labelJudgement->setStyleSheet(QString("color: qlineargradient(x1:0, x2:0, y1:1, y2:0, stop:0 #FF7A00, stop:1 #FFD700); font-size: 28px; font-family: Kazesawa;"));
-        else if (text == "GREAT")
-            play->getUI()->labelJudgement->setStyleSheet(QString("color: qlineargradient(x1:0, x2:0, y1:1, y2:0, stop:0 #FF1493, stop:1 #FFB6C1); font-size: 28px; font-family: Kazesawa;"));
-        else if (text == "GOOD")
-            play->getUI()->labelJudgement->setStyleSheet(QString("color: qlineargradient(x1:0, x2:0, y1:1, y2:0, stop:0 #008000, stop:1 #90EE90); font-size: 28px; font-family: Kazesawa;"));
-        else
-            play->getUI()->labelJudgement->setStyleSheet(QString("color: qlineargradient(x1:0, x2:0, y1:1, y2:0, stop:0 #696969, stop:1 #D3D3D3); font-size: 28px; font-family: Kazesawa;"));
+    connect(gameManager, &GameManager::judgementResult, this, [this, play](const QString &text, GameManager *gm) {
+        judgementManage(play, text, gm);
         });
 
     // 连接Restart信号
@@ -239,4 +232,26 @@ void SongWindow::on_startButton_clicked()
 
     connect(play, &PlayWindow::returnToMenu, this, &QWidget::show);
     QTimer::singleShot(2000, play, &PlayWindow::startGame); // 等待2s再开始游戏
+}
+
+void SongWindow::judgementManage(PlayWindow *play, const QString &text, GameManager *gm)
+{
+    play->shakeLabelJudgement();
+
+    QString mystery("▪");
+    QString textShowed = mystery + text + mystery; // 神秘符号装饰
+    play->getUI()->labelJudgement->setText(textShowed);
+    if (text == "PERFECT")
+        play->getUI()->labelJudgement->setStyleSheet(QString("color: qlineargradient(x1:0, x2:0, y1:1, y2:0, stop:0 #FF7A00, stop:1 #FFD700); font-family: Kazesawa;"));
+    else if (text == "GREAT")
+        play->getUI()->labelJudgement->setStyleSheet(QString("color: qlineargradient(x1:0, x2:0, y1:1, y2:0, stop:0 #FF1493, stop:1 #FFB6C1); font-family: Kazesawa;"));
+    else if (text == "GOOD")
+        play->getUI()->labelJudgement->setStyleSheet(QString("color: qlineargradient(x1:0, x2:0, y1:1, y2:0, stop:0 #008000, stop:1 #90EE90); font-family: Kazesawa;"));
+    else
+        play->getUI()->labelJudgement->setStyleSheet(QString("color: qlineargradient(x1:0, x2:0, y1:1, y2:0, stop:0 #696969, stop:1 #D3D3D3); font-family: Kazesawa;"));
+    play->getUI()->labelNote->setText(QString("<span style='color:white;'>%1</span><br>"
+                                   "<span style='color:white;'>%2</span><br>"
+                                   "<span style='color:white;'>%3</span><br>"
+                                   "<span style='color:white;'>%4</span><br>"
+                                              "<span style='color:white;'>%5</span>").arg(gm->maxCombo()).arg(gm->perfectCount()).arg(gm->greatCount()).arg(gm->goodCount()).arg(gm->missCount()));
 }

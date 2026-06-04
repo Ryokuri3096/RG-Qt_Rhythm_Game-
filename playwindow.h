@@ -22,6 +22,8 @@
 #include <QDir>
 #include <QDebug>
 #include <QSettings>
+#include <QPropertyAnimation>
+#include <QSequentialAnimationGroup>
 #include "gamemanager.h"
 #include "resultoverlay.h"
 #include "pauseoverlay.h"
@@ -40,11 +42,14 @@ public:
 
     void extracted(QJsonArray &timeArray);
     void loadChart(const QString &chartPath, GameManager &gameManager);
-    void loadSettings();          // 从 QSettings 加载音量/流速/键位
+    void loadSettings(); // 从 QSettings 加载音量/流速/键位
+    void loadGui();
     void startGame();
     void setFps(int fps); // 60 或 120
     int fps() const;
-    void updateEffects();
+    void updateEffects(); // 实现打击特效
+    void shakeLabelJudgement(); // 实现击中音符的判定文字抖动效果
+    void drawHold(QPainter &p, int lane, int x, int noteW, int topY, int bottomY, bool headFixed = false); // 实现绘画Hold
 
     void togglePause(); // 切换暂停/恢复
     void restartGame(); // 重新开始
@@ -100,8 +105,8 @@ private:
     double m_speedFactor = 1.0; // 速度倍率
     QString m_songTitle; // 乐曲标题
     QString m_songArtist; // 乐曲作者
-    QString m_coverPath; // 曲绘文件路径（可以是绝对路径或资源路径）
-    QString m_chartPath; // 谱面文件路径（用于生成 songId）
+    QString m_coverPath; // 曲绘文件路径
+    QString m_chartPath; // 谱面文件路径 用于生成 songId
     QString m_difficulty; // 谱面版本名称
 
     // 游戏状态
@@ -109,7 +114,7 @@ private:
     qint64 m_musicStartOffset = 0; // 偏移量
     int m_hitLineY = 0; // 判定线Y坐标
     float m_baseSpeed = 1.00f; // 基础下落速度 单位为px/ms（settings可调0.01~2.00）
-    int m_fps = 120; // 帧率 默认120
+    int m_fps = 60; // 帧率 默认60
     bool m_gameEnded = false; // 记录游戏是否结束 防止重复发射
     bool m_showResult = false; // 是否处于结算前清理状态
     QList<HitEffect> m_effects; // 打击特效
@@ -118,6 +123,12 @@ private:
     bool m_paused = false;
     PauseOverlay *m_pauseOverlay = nullptr;
     qint64 m_pausedTime = 0; // 暂停时的elapsed值
+
+    // 动画美术相关
+    QPoint m_judgementOrigin = QPoint(0, 0); // 判定文字的原始位置
+    QSequentialAnimationGroup* m_judgeAnimGroup = nullptr;
+    QPixmap m_tapBlue, m_tapRed;
+    QPixmap m_holdBodyBlue, m_holdBodyRed;
 
     // 当前按住的Hold
     std::vector<GameNote*> m_activeHolds;
@@ -145,6 +156,8 @@ private:
     QColor judgementColor(int diffMs);
     int laneX(int lane) const ;
     int laneWidth(int lane) const ;
+    QPixmap tapPixmap(int lane) const ;
+    QPixmap holdBodyPixmap(int lane) const ;
 
     void pauseGame();
     void resumeGame();
