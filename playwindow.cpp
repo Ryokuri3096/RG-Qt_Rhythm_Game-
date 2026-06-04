@@ -1,6 +1,9 @@
 #include "playwindow.h"
 #include "ui_playwindow.h"
 
+#include <QCoreApplication>
+#include <QDateTime>
+
 PlayWindow::PlayWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::PlayWindow)
@@ -24,17 +27,6 @@ PlayWindow::PlayWindow(QWidget *parent)
     connect(m_gameTimer, &QTimer::timeout, this, &PlayWindow::gameLoop);
 }
 
-void PlayWindow::keyPressEvent(QKeyEvent *event)
-{
-    if (event->key() == Qt::Key_F11) {
-        if (isFullScreen())
-            showNormal();
-        else
-            showFullScreen();
-    }
-    QMainWindow::keyPressEvent(event);
-}
-
 PlayWindow::~PlayWindow()
 {
     delete ui;
@@ -47,6 +39,7 @@ Ui::PlayWindow *PlayWindow::getUI()
 
 void PlayWindow::loadChart(const QString &chartPath, GameManager &gameManager)
 {
+    m_chartPath = chartPath; // 保存谱面路径，用于结算时生成 songId
     QFile file(chartPath); // 打开谱面文件
     if (!file.open(QIODevice::ReadOnly)) {
         qWarning("Cannot open chart file!");
@@ -155,9 +148,35 @@ void PlayWindow::loadChart(const QString &chartPath, GameManager &gameManager)
     m_player->setSource(QUrl::fromLocalFile(audioPath + '/' + audioFileName)); // 把音乐加入播放器
 }
 
+void PlayWindow::loadSettings()
+{
+    QSettings settings("RG", "Settings");
+
+    // 从 settingswindow 读取音乐音量（0~100 → 0.0~1.0）
+    int vol = settings.value("audio/musicVolume", 100).toInt();
+    m_audioOutput->setVolume(vol / 100.0);
+
+    // 读取流速（1~200 → 0.01~2.00）
+    int spd = settings.value("gameplay/speed", 100).toInt();
+    m_baseSpeed = spd / 100.0;
+
+    // 读取键位映射（四个轨道各存一个 Qt::Key 值）
+    int defaultKeys[4] = {Qt::Key_S, Qt::Key_D, Qt::Key_J, Qt::Key_K};
+    m_keyLaneMap.clear();
+    for (int i = 0; i < 4; i++) {
+        int key = settings.value(QString("gameplay/keyMapping%1").arg(i), defaultKeys[i]).toInt();
+        m_keyLaneMap[key] = i;
+    }
+
+    qDebug() << "PlayWindow loadSettings - Vol:" << vol << "Speed:" << m_baseSpeed;
+}
+
 void PlayWindow::startGame()
 {
     if (m_notes.empty()) return;
+
+    // 开局前加载用户设置
+    loadSettings();
 
     // 游戏初始化
     m_elapsed.start();
@@ -548,6 +567,74 @@ void PlayWindow::showResult(GameManager *gm)
     QPixmap cover;
     if (!m_coverPath.isEmpty()) {
         cover.load(m_coverPath);
+    }
+
+    // ── 保存游玩记录到 data/play_history.json（最多6条，FIFO）──
+    // songId = 谱面所在目录名（如 "lovely_picnic"）
+    QString songId = QFileInfo(m_chartPath).dir().dirName();
+    QString jsonDir  = QCoreApplication::applicationDirPath() + "/data";
+    QString jsonPath = jsonDir + "/play_history.json";
+
+    // 读取已有记录
+    QJsonArray historyArr;
+    QFile readFile(jsonPath);
+    if (readFile.open(QIODevice::ReadOnly)) {
+        QJsonDocument doc = QJsonDocument::fromJson(readFile.readAll());
+        if (doc.isArray()) {
+            historyArr = doc.array();
+        }
+        readFile.close();
+    }
+
+    // 构建新记录（插到最前面）
+    QJsonObject newRec;
+    newRec["songId"]    = songId;
+    newRec["songName"]  = m_songTitle;
+    newRec["score"]     = gm->score();
+    newRec["coverPath"] = m_coverPath;
+    newRec["playTime"]  = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm");
+    historyArr.prepend(newRec);
+
+    // 超过6条则移除最早的
+    while (historyArr.size() > 6) {
+        historyArr.removeLast();
+    }
+
+    // 写回 JSON 文件
+    QDir().mkpath(jsonDir); // 确保 data 目录存在
+    QFile writeFile(jsonPath);
+    if (writeFile.open(QIODevice::WriteOnly)) {
+        writeFile.write(QJsonDocument(historyArr).toJson());
+        writeFile.close();
+        qDebug() << "play history saved to" << jsonPath << ", count:" << historyArr.size();
+    }
+
+    // ── 更新统计数据（Clear / Full Combo / All Perfect）──
+    QSettings profileSettings("RG", "Profile");
+
+    // 判断是否首次游玩该曲目 → clear+1
+    QStringList playedSongs = profileSettings.value("profile/played_songs").toStringList();
+    if (!playedSongs.contains(songId)) {
+        playedSongs.append(songId);
+        profileSettings.setValue("profile/played_songs", playedSongs);
+
+        int clearCount = profileSettings.value("profile/clear_count", 0).toInt() + 1;
+        profileSettings.setValue("profile/clear_count", clearCount);
+        qDebug() << "first clear of" << songId << "— clearCount:" << clearCount;
+    }
+
+    // 如果 miss=0 → Full Combo+1
+    if (gm->missCount() == 0) {
+        int fcCount = profileSettings.value("profile/fc_count", 0).toInt() + 1;
+        profileSettings.setValue("profile/fc_count", fcCount);
+        qDebug() << "Full Combo! fcCount:" << fcCount;
+    }
+
+    // 如果 great=good=miss=0 → All Perfect+1
+    if (gm->greatCount() == 0 && gm->goodCount() == 0 && gm->missCount() == 0) {
+        int apCount = profileSettings.value("profile/ap_count", 0).toInt() + 1;
+        profileSettings.setValue("profile/ap_count", apCount);
+        qDebug() << "All Perfect! apCount:" << apCount;
     }
 
     // 创建覆盖层

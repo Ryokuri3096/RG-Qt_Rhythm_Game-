@@ -4,6 +4,7 @@
 #include <QPropertyAnimation>
 #include <QPushButton>
 #include "./ui_mainwindow.h"
+#include "profilewindow.h"  // 个人资料界面
 #include "settingswindow.h"
 #include "songwindow.h"
 
@@ -37,6 +38,13 @@ void MainWindow::on_playButton_clicked()
 void MainWindow::on_profileButton_clicked()
 {
     qDebug() << "profileButton is clicked";
+
+    this->hide(); //隐藏当前主窗口
+    ProfileWindow *profileWin = new ProfileWindow();
+
+    profileWin->setMainWindow(this);        // 把主窗口指针传给个人资料窗口
+    profileWin->setFixedSize(this->size()); //设置窗口大小与主窗口相同
+    profileWin->show();
 }
 
 void MainWindow::on_settingsButton_clicked()

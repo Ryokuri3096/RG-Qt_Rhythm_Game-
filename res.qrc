@@ -9,5 +9,8 @@
         <file>fonts/GeosansLight-1.ttf</file>
         <file>fonts/GeosansLight-Oblique-2.ttf</file>
         <file>fonts/Kazesawa-Regular.ttf</file>
+        <!-- Profile界面使用的图片资源 -->
+        <file>img/default_avatar.png</file>
+        <file>img/song_placeholder.jpg</file>
     </qresource>
 </RCC>

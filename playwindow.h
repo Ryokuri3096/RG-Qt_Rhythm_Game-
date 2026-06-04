@@ -21,7 +21,7 @@
 #include <QtMath>
 #include <QDir>
 #include <QDebug>
-
+#include <QSettings>
 #include "gamemanager.h"
 #include "resultoverlay.h"
 #include "pauseoverlay.h"
@@ -40,6 +40,7 @@ public:
 
     void extracted(QJsonArray &timeArray);
     void loadChart(const QString &chartPath, GameManager &gameManager);
+    void loadSettings();          // 从 QSettings 加载音量/流速/键位
     void startGame();
     void setFps(int fps); // 60 或 120
     int fps() const;
@@ -100,13 +101,14 @@ private:
     QString m_songTitle; // 乐曲标题
     QString m_songArtist; // 乐曲作者
     QString m_coverPath; // 曲绘文件路径（可以是绝对路径或资源路径）
+    QString m_chartPath; // 谱面文件路径（用于生成 songId）
     QString m_difficulty; // 谱面版本名称
 
     // 游戏状态
     QElapsedTimer m_elapsed; // 游戏时长
     qint64 m_musicStartOffset = 0; // 偏移量
     int m_hitLineY = 0; // 判定线Y坐标
-    float m_baseSpeed = 1.2f; // 基础下落速度 单位为px/ms
+    float m_baseSpeed = 1.00f; // 基础下落速度 单位为px/ms（settings可调0.01~2.00）
     int m_fps = 120; // 帧率 默认120
     bool m_gameEnded = false; // 记录游戏是否结束 防止重复发射
     bool m_showResult = false; // 是否处于结算前清理状态
