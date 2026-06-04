@@ -20,7 +20,11 @@
 #include <QMap>
 #include <QtMath>
 #include <QDir>
+#include <QDebug>
+
 #include "gamemanager.h"
+#include "resultoverlay.h"
+#include "pauseoverlay.h"
 
 namespace Ui {
 class PlayWindow;
@@ -37,11 +41,20 @@ public:
     void extracted(QJsonArray &timeArray);
     void loadChart(const QString &chartPath, GameManager &gameManager);
     void startGame();
+    void setFps(int fps); // 60 或 120
+    int fps() const;
+    void updateEffects();
+
+    void togglePause(); // 切换暂停/恢复
+    void restartGame(); // 重新开始
 
     Ui::PlayWindow *getUI();
 
 signals:
-    void judgement(int dissMs);
+    void judgement(int dissMs); // 处理判定 接收判定信号的函数
+    void gameFinished(); // 游戏结束信号
+    void returnToMenu();
+    void restartRequested(); // 请求重启游戏 由GameManager接收 重置GameManager各成员变量
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -51,6 +64,9 @@ protected:
 
 private slots:
     void gameLoop();
+
+public slots:
+    void showResult(GameManager *gm); // 显示结算画面
 
 private:
     Ui::PlayWindow *ui;
@@ -69,24 +85,44 @@ private:
         bool holding = false;
     };
 
+    struct HitEffect { // 特效结构体
+        int lane;
+        QColor color;
+        qint64 startTime; // 当前音乐时间（ms）
+        static constexpr int duration = 300; // 持续 300ms
+    };
+
     // 谱面数据
     std::vector<GameNote> m_notes;
     double m_bpm = 130.0; // 乐曲bpm
     int m_divide = 4; // 每拍的细分 默认为4
     double m_speedFactor = 1.0; // 速度倍率
+    QString m_songTitle; // 乐曲标题
+    QString m_songArtist; // 乐曲作者
+    QString m_coverPath; // 曲绘文件路径（可以是绝对路径或资源路径）
+    QString m_difficulty; // 谱面版本名称
 
     // 游戏状态
     QElapsedTimer m_elapsed; // 游戏时长
     qint64 m_musicStartOffset = 0; // 偏移量
     int m_hitLineY = 0; // 判定线Y坐标
     float m_baseSpeed = 1.2f; // 基础下落速度 单位为px/ms
+    int m_fps = 120; // 帧率 默认120
+    bool m_gameEnded = false; // 记录游戏是否结束 防止重复发射
+    bool m_showResult = false; // 是否处于结算前清理状态
+    QList<HitEffect> m_effects; // 打击特效
+
+    // 暂停相关
+    bool m_paused = false;
+    PauseOverlay *m_pauseOverlay = nullptr;
+    qint64 m_pausedTime = 0; // 暂停时的elapsed值
 
     // 当前按住的Hold
     std::vector<GameNote*> m_activeHolds;
 
     // Filck轨道鼠标状态
     QPoint m_lastMousePos;
-    QSet<int> m_activeFilckLanes; // Flick轨道编号
+    QSet<int> m_activeFlickLanes; // Flick轨道编号
 
     // 按键映射
     QMap<int, int> m_keyLaneMap;
@@ -104,6 +140,12 @@ private:
     void checkFlickHit(int deltaY);
     void updateMissedNotes();
     qint64 currentMusicTime() const;
+    QColor judgementColor(int diffMs);
+    int laneX(int lane) const ;
+    int laneWidth(int lane) const ;
+
+    void pauseGame();
+    void resumeGame();
 };
 
 #endif // PLAYWINDOW_H

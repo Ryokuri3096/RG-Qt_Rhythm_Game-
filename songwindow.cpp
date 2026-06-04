@@ -209,12 +209,34 @@ void SongWindow::on_startButton_clicked()
     connect(gameManager, &GameManager::comboChanged, this, [this, play](int combo) {
         play->getUI()->labelCombo->setText(QString("Combo: %1").arg(combo));
         });
+    connect(gameManager, &GameManager::accuracyChanged, this, [this, play](double accuracy) {
+        play->getUI()->labelAccuracy->setText(QString("Accuracy: %1%").arg(QString::number(accuracy, 'f', 4)));
+        });
     connect(gameManager, &GameManager::judgementResult, this, [this, play](const QString &text, const QColor &color) {
         play->getUI()->labelJudgement->setText(text);
-        play->getUI()->labelJudgement->setStyleSheet(QString("color: %1; font-size: 28px;").arg(color.name()));
+        if (text == "PERFECT")
+            play->getUI()->labelJudgement->setStyleSheet(QString("color: qlineargradient(x1:0, x2:0, y1:1, y2:0, stop:0 #FF7A00, stop:1 #FFD700); font-size: 28px; font-family: Kazesawa;"));
+        else if (text == "GREAT")
+            play->getUI()->labelJudgement->setStyleSheet(QString("color: qlineargradient(x1:0, x2:0, y1:1, y2:0, stop:0 #FF1493, stop:1 #FFB6C1); font-size: 28px; font-family: Kazesawa;"));
+        else if (text == "GOOD")
+            play->getUI()->labelJudgement->setStyleSheet(QString("color: qlineargradient(x1:0, x2:0, y1:1, y2:0, stop:0 #008000, stop:1 #90EE90); font-size: 28px; font-family: Kazesawa;"));
+        else
+            play->getUI()->labelJudgement->setStyleSheet(QString("color: qlineargradient(x1:0, x2:0, y1:1, y2:0, stop:0 #696969, stop:1 #D3D3D3); font-size: 28px; font-family: Kazesawa;"));
         });
+
+    // 连接Restart信号
+    connect(play, &PlayWindow::restartRequested, gameManager, &GameManager::reset);
+
+    // 连接游戏结束
+    connect(play, &PlayWindow::gameFinished, this, [this, play, gameManager]() {
+        QTimer::singleShot(2000, this, [play, gameManager]() {
+            play->showResult(gameManager);   // 直接在 play 上显示覆盖层
+        });
+    });
 
     play->show();
     this->hide();
+
+    connect(play, &PlayWindow::returnToMenu, this, &QWidget::show);
     QTimer::singleShot(2000, play, &PlayWindow::startGame); // 等待2s再开始游戏
 }

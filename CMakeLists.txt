@@ -28,7 +28,15 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         songwindow.h songwindow.cpp songwindow.ui
         playwindow.h playwindow.cpp playwindow.ui
         gamemanager.h gamemanager.cpp
+<<<<<<< HEAD
         settingswindow.h settingswindow.cpp settingswindow.ui
+=======
+        resultoverlay.h resultoverlay.cpp resultoverlay.ui
+        pauseoverlay.h pauseoverlay.cpp pauseoverlay.ui
+
+
+
+>>>>>>> 522e69526fbc281bc7e7977a8067995a35ecdaf4
 
 
 
