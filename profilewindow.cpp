@@ -69,7 +69,7 @@ ProfileWindow::ProfileWindow(QWidget *parent)
     applyStyles();
     connectSignals();
 
-    // 安装事件过滤器，拦截头像和昵称标签的鼠标点击
+    // 安装事件过滤器 拦截头像和昵称标签的鼠标点击
     ui->avatarLabel->installEventFilter(this);
     ui->nicknameLabel->installEventFilter(this);
 }
@@ -103,7 +103,7 @@ bool ProfileWindow::eventFilter(QObject *obj, QEvent *event)
 // 给.ui中的控件应用代码样式
 void ProfileWindow::applyStyles()
 {
-    // 头像：优先加载用户自定义头像，否则使用默认
+    // 头像 优先加载用户自定义头像 否则使用默认
     QString savedAvatarPath = m_settings->value("profile/avatar_path").toString();
     QPixmap avatarPix;
     bool hasCustomAvatar = false;

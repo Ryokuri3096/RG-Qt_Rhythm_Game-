@@ -141,7 +141,7 @@ QString SongWindow::findCoverImage(const QString &dirPath)
 
 void SongWindow::updateLeftPanel(const QString &jsonPath, const QJsonObject &jsonObj)
 {
-    // 1. 处理封面图片
+    //  处理曲绘
     QFileInfo jsonFileInfo(jsonPath);
     QString dirPath = jsonFileInfo.absolutePath();
     QString imagePath = findCoverImage(dirPath);
@@ -160,24 +160,23 @@ void SongWindow::updateLeftPanel(const QString &jsonPath, const QJsonObject &jso
         coverLabel->setPixmap(QPixmap()); // 清空图片
     }
 
-    // 2. 提取并显示歌曲信息
+    // 提取并显示歌曲信息
     QJsonObject metaObj = jsonObj.value("meta").toObject();
     QJsonObject songObj = metaObj.value("song").toObject();
 
     QString title = songObj.value("title").toString("unknown");
     QString artist = songObj.value("artist").toString("unknown");
-    QString difficulty = songObj.value("difficulty").toString("?");
-    // 可根据需要继续提取其他字段
+    QString difficulty = metaObj.value("version").toString("?");
 
     QString infoHtml = QString(
                            "<table width='100%' cellspacing='0' cellpadding='0' style='color:white;'>"
                            "<tr>"
-                           // 左侧：歌曲标题与艺术家
+                           // 歌曲标题与艺术家
                            "<td valign='bottom' style='padding-right:10px;'>"
                            "<b style='font-size:24px;'>%1</b><br>"
                            "<span style='color:#ccc; font-size:14px;'>%2</span>"
                            "</td>"
-                           // 右侧：难度
+                           // 难度
                            "<td align='right' valign='bottom'>"
                            "<span style='font-size:32px; font-weight:bold;'>Lv.%3</span>"
                            "</td>"
@@ -222,7 +221,7 @@ void SongWindow::on_startButton_clicked()
 
     // 连接游戏结束
     connect(play, &PlayWindow::gameFinished, this, [this, play, gameManager]() {
-        QTimer::singleShot(2000, this, [play, gameManager]() {
+        QTimer::singleShot(1000, this, [play, gameManager]() {
             play->showResult(gameManager);   // 直接在 play 上显示覆盖层
         });
     });

@@ -29,6 +29,9 @@
    <string notr="true">color:gray;</string>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="styleSheet">
+    <string notr="true"/>
+   </property>
    <widget class="QLabel" name="labelScore">
     <property name="geometry">
      <rect>

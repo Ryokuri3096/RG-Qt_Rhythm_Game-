@@ -23,6 +23,7 @@ void ResultOverlay::setupUI(GameManager *gm, const QString &songTitle,
                             const QString &difficulty)
 {
     ui->titleLabel->setText(songTitle);
+    ui->artistLabel->setText(artist);
     ui->coverLabel->setPixmap(cover.scaled(ui->coverLabel->width(),
                                        ui->coverLabel->height(),
                                        Qt::IgnoreAspectRatio, // 强制拉伸 把曲绘变成正方形

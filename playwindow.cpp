@@ -190,6 +190,7 @@ void PlayWindow::startGame()
     // 游戏初始化
     m_elapsed.start();
     m_musicStartOffset = 0;
+    this->grabMouse(); // 让窗口独占鼠标事件
 
     for (auto &note : m_notes) {
         note.missed = false;
@@ -332,7 +333,7 @@ void PlayWindow::paintEvent(QPaintEvent *)
             QRectF rect(x + 4, noteY, noteW, 20);
             p.fillRect(rect, QColor(200, 0, 200));
             p.setPen(Qt::white);
-            p.drawText(rect, Qt::AlignCenter, "↕");
+            //p.drawText(rect, Qt::AlignCenter, "↕");
             break;
         }
         }
@@ -388,8 +389,10 @@ void PlayWindow::keyReleaseEvent(QKeyEvent *event)
 
 void PlayWindow::mouseMoveEvent(QMouseEvent *event)
 {
-    int deltaY = event->pos().y() - m_lastMousePos.y();
-    m_lastMousePos = event->pos();
+    int deltaY = event->globalPos().y() - m_lastMousePos.y();
+    m_lastMousePos = event->globalPos();
+    qDebug()<<m_lastMousePos;
+    if (this->mouseGrabber() == this) qDebug()<<"grabed";
 
     if (qAbs(deltaY) < 10) return; // 鼠标纵向移动距离大于10px才判定
 
@@ -533,12 +536,14 @@ void PlayWindow::updateMissedNotes()
             break;
         }
     }
-    if (allJudged) {
-        m_gameEnded = true;
-        m_gameTimer->stop(); // 停止刷新
-        m_player->stop(); // 停止音乐
-        emit gameFinished();
-    }
+    connect(m_player, &QMediaPlayer::mediaStatusChanged, this, [this] {
+        if (m_player->mediaStatus() == QMediaPlayer::EndOfMedia) {
+            m_gameEnded = true;
+            m_gameTimer->stop(); // 停止刷新
+            m_player->stop(); // 停止音乐
+            emit gameFinished();
+        }
+    }) ;
 }
 
 void PlayWindow::setFps(int fps) {
@@ -554,6 +559,7 @@ void PlayWindow::showResult(GameManager *gm)
 {
     m_showResult = true;
     update();
+    this->releaseMouse();
 
     // 隐藏 UI 控件...
     ui->labelScore->hide();
@@ -665,6 +671,7 @@ void PlayWindow::pauseGame()
 {
     if (m_paused) return;
     m_paused = true;
+    this->releaseMouse();
 
     // 保存当前时间
     m_pausedTime = m_elapsed.elapsed();
@@ -699,6 +706,8 @@ void PlayWindow::resumeGame()
     if (!m_paused) return;
     m_paused = false;
 
+    this->grabMouse();
+
     // 隐藏覆盖层
     if (m_pauseOverlay)
         m_pauseOverlay->hide();
@@ -715,6 +724,7 @@ void PlayWindow::resumeGame()
 void PlayWindow::restartGame()
 {
     loadGui();
+    this->grabMouse();
 
     // 重置所有音符状态
     for (auto &note : m_notes) {
