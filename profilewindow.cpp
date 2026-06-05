@@ -382,9 +382,14 @@ void ProfileWindow::refreshCardDisplay()
         QPixmap coverPix;
         if (i < count) {
             const PlayRecord &rec = m_playHistory[i];
-            if (!rec.coverPath.isEmpty() && QFile::exists(rec.coverPath)) {
-                coverPix.load(rec.coverPath);
-                qDebug() << "loading cover:" << rec.coverPath
+            // 兼容旧绝对路径 + 新相对路径
+            QString resolvedPath = rec.coverPath;
+            if (QDir::isRelativePath(resolvedPath)) {
+                resolvedPath = QCoreApplication::applicationDirPath() + "/" + resolvedPath;
+            }
+            if (!rec.coverPath.isEmpty() && QFile::exists(resolvedPath)) {
+                coverPix.load(resolvedPath);
+                qDebug() << "loading cover:" << resolvedPath
                          << "success:" << !coverPix.isNull();
             }
         }

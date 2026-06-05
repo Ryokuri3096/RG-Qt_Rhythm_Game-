@@ -89,6 +89,7 @@ private:
         bool missed = false;
         bool judged = false;
         bool holding = false;
+        bool wasHeld = false; // 是否曾进入按住状态（用于区分"断掉"还是"从未接住"）
     };
 
     struct HitEffect { // 特效结构体

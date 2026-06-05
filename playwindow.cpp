@@ -283,7 +283,17 @@ void PlayWindow::paintEvent(QPaintEvent *)
 
     // 绘制音符
     for (const auto &note : m_notes) {
-        if (note.judged || note.missed) continue;
+        if (note.judged && !note.missed) continue;
+        bool isDeadHold = false;
+        if (note.missed) {
+            if (note.data.type != NoteData::HOLD) continue;
+            isDeadHold = true;
+        }
+        if (!isDeadHold && !note.judged && !note.holding
+            && note.data.type == NoteData::HOLD
+            && curTime > note.data.timeMs + 200) {
+            isDeadHold = true;
+        }
 
         double yOffset = (note.data.timeMs - curTime) * speed;
         int noteY = m_hitLineY - (int)yOffset;
@@ -298,11 +308,10 @@ void PlayWindow::paintEvent(QPaintEvent *)
             if (bodyBottom < -50 || bodyTop > height() + 50) continue; // 整个身体都不在屏幕内才跳过
         }
 
-        // 计算音符的 X 坐标和宽度
         int x, noteW;
         if (note.data.lane < 4) {
             x = offsetX + note.data.lane * leftLaneW;
-            noteW = leftLaneW - 8;  // 左右各留4像素
+            noteW = leftLaneW - 8;
         } else {
             x = offsetX + 4 * leftLaneW;
             noteW = rightLaneW - 8;
@@ -316,13 +325,31 @@ void PlayWindow::paintEvent(QPaintEvent *)
             break;
         }
         case NoteData::HOLD: {
-            if (note.holding) { // 按住
-                int headY = m_hitLineY;
+            if (isDeadHold) {
+                int endY = m_hitLineY - (int)((note.data.endTimeMs - curTime) * speed);
+                int headY = note.wasHeld ? qMin(noteY, m_hitLineY) : noteY;
+                int topY = qMin(headY, endY);
+                int botY = qMax(headY, endY);
+                const int headH = 20;
+
+                QColor deadBody = (note.data.lane < 2) ? QColor(80, 90, 110, 180) : QColor(95, 55, 60, 180);
+                int bodyTop = topY + headH;
+                int bodyBot = botY - headH;
+                if (bodyBot > bodyTop) {
+                    p.fillRect(x + 4, bodyTop, noteW, bodyBot - bodyTop, deadBody);
+                }
+                QColor deadHead = (note.data.lane < 2) ? QColor(60, 65, 75, 220) : QColor(65, 45, 50, 220);
+                p.fillRect(x + 4, topY, noteW, headH, deadHead);
+                if (botY - topY > headH) {
+                    p.fillRect(x + 4, botY - headH, noteW, headH, deadHead);
+                }
+            } else if (note.holding) {
+                int headY = qMin(m_hitLineY, noteY);
                 double endYOffset = (note.data.endTimeMs - curTime) * speed;
                 int endY = m_hitLineY - (int)endYOffset;
                 drawHold(p, note.data.lane, x, noteW, headY, endY, true);
             }
-            else { // 未按住
+            else {
                 int endY = m_hitLineY - (int)((note.data.endTimeMs - curTime) * speed);
                 drawHold(p, note.data.lane, x, noteW, noteY, endY, false);
             }
@@ -417,13 +444,20 @@ void PlayWindow::checkTapHit(int lane)
     if (bestNote) {
         if (bestNote->data.type == NoteData::HOLD) {
             bestNote->holding = true;
+            bestNote->wasHeld = true; // 标记曾被按住过，绘制时 head 不突变
             m_activeHolds.push_back(bestNote);
+            // HOLD头部判定：头部在判定线以上(提前按) → 强制Perfect
+            // 头部已过判定线(按晚) → 按原diff分段
+            qint64 headDiff = (curTime > bestNote->data.timeMs) ? minDiff : 0;
+            QColor col = judgementColor(headDiff);
+            m_effects.append({bestNote->data.lane, col, currentMusicTime()});
+            emit judgement(headDiff);
         } else {
             bestNote->judged = true;
+            QColor col = judgementColor(minDiff);
+            m_effects.append({bestNote->data.lane, col, currentMusicTime()});
+            emit judgement(minDiff); // 发出判定信号
         }
-        QColor col = judgementColor(minDiff);
-        m_effects.append({bestNote->data.lane, col, currentMusicTime()});
-        emit judgement(minDiff); // 发出判定信号
     }
 }
 
@@ -441,11 +475,11 @@ void PlayWindow::checkHoldRelease(int lane)
             break;
         }
         if (holdNote->data.lane == lane && holdNote->holding) {
-            // 提前释放 则计算时间与尾部的差值
             qint64 diff = qAbs((qint64)(holdNote->data.endTimeMs - curTime));
-            if (diff < (holdNote->data.endTimeMs - holdNote->data.timeMs) * 4 / 5) { // 按住时间占比80%即为Perfect
+            if (diff <= (holdNote->data.endTimeMs - holdNote->data.timeMs) / 10) {
                 emit judgement(0);
             } else {
+                holdNote->missed = true;
                 emit judgement(999);
             }
             holdNote->holding = false;
@@ -474,7 +508,7 @@ void PlayWindow::checkFlickHit(int deltaY)
     if (bestNote) {
         bestNote->judged = true;
         m_activeFlickLanes.remove(bestNote->data.lane);
-        if (minDiff <= 200) { // 如果在200ms内滑动则判定为Perfect 否则不判定
+        if (minDiff <= 200) {
             QColor col = judgementColor(0);
             m_effects.append({bestNote->data.lane, col, currentMusicTime()});
             emit judgement(0);
@@ -486,7 +520,6 @@ void PlayWindow::updateMissedNotes()
 {
     qint64 curTime = currentMusicTime();
 
-    // 自动完成按住到结束的 Hold
     for (auto it = m_activeHolds.begin(); it != m_activeHolds.end(); ) {
         GameNote* hold = *it;
         if (curTime >= hold->data.endTimeMs) {
@@ -503,7 +536,6 @@ void PlayWindow::updateMissedNotes()
         if (note.judged || note.missed) continue;
 
         if (note.data.type == NoteData::HOLD) {
-            // 对于 Hold，整个长条都错过了才判 Miss
             if (curTime > note.data.endTimeMs + 200) {
                 note.missed = true;
                 if (note.holding) {
@@ -513,7 +545,7 @@ void PlayWindow::updateMissedNotes()
                         m_activeHolds.erase(it);
                 }
                 emit judgement(999);
-                emit judgement(999); // 头尾都算作miss 故发射两次miss信号
+                emit judgement(999);
             }
         } else {
             // TAP 和 FLICK 在头部错过 200ms 时判 Miss
@@ -590,11 +622,13 @@ void PlayWindow::showResult(GameManager *gm)
     }
 
     // 构建新记录（插到最前面）
+    // 曲绘路径存相对于exe目录的相对路径，换设备也能加载
+    QString relativeCover = QDir(QCoreApplication::applicationDirPath()).relativeFilePath(m_coverPath);
     QJsonObject newRec;
     newRec["songId"]    = songId;
     newRec["songName"]  = m_songTitle;
     newRec["score"]     = gm->score();
-    newRec["coverPath"] = m_coverPath;
+    newRec["coverPath"] = relativeCover;
     newRec["playTime"]  = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm");
     historyArr.prepend(newRec);
 
