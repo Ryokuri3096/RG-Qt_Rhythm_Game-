@@ -3,6 +3,8 @@
 
 #include <QCoreApplication>
 #include <QDateTime>
+#include <QGraphicsOpacityEffect>
+#include <QPropertyAnimation>
 
 PlayWindow::PlayWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -26,7 +28,21 @@ PlayWindow::PlayWindow(QWidget *parent)
     m_gameTimer = new QTimer(this); // 循环定时器
     connect(m_gameTimer, &QTimer::timeout, this, &PlayWindow::gameLoop);
 
+    // 初始化音效（资源文件嵌入exe，跨设备通用）
+    m_tapSfx = new QSoundEffect(this);
+    m_tapSfx->setSource(QUrl("qrc:/sfx/tap.wav"));
+    m_flickSfx = new QSoundEffect(this);
+    m_flickSfx->setSource(QUrl("qrc:/sfx/flick.wav"));
+    m_click1Sfx = new QSoundEffect(this);
+    m_click1Sfx->setSource(QUrl("qrc:/sfx/click1.wav"));
+    m_click2Sfx = new QSoundEffect(this);
+
+m_click2Sfx->setSource(QUrl("qrc:/sfx/click2.wav"));
+
     m_judgementOrigin = ui->labelJudgement->pos();
+
+    // 加载游戏背景图（构造函数最后，不干扰音效初始化）
+    m_background.load(":/img/play_bp.jpg");
 }
 
 PlayWindow::~PlayWindow()
@@ -169,6 +185,11 @@ void PlayWindow::loadSettings()
     int spd = settings.value("gameplay/speed", 100).toInt();
     m_baseSpeed = spd / 100.0;
 
+    // 音效音量只控制音符音效（tap/flick）
+    double sfxVol = settings.value("audio/sfxVolume", 100).toInt() / 100.0;
+    m_tapSfx->setVolume(sfxVol);
+    m_flickSfx->setVolume(sfxVol);
+
     // 读取键位映射（四个轨道各存一个 Qt::Key 值）
     int defaultKeys[4] = {Qt::Key_S, Qt::Key_D, Qt::Key_J, Qt::Key_K};
     m_keyLaneMap.clear();
@@ -238,6 +259,16 @@ void PlayWindow::paintEvent(QPaintEvent *)
 {
     QPainter p(this);
     p.setRenderHint(QPainter::Antialiasing, false);
+
+    // 最底层背景图
+    if (!m_background.isNull()) {
+        QPixmap scaled = m_background.scaled(size(),
+                                              Qt::KeepAspectRatioByExpanding,
+                                              Qt::SmoothTransformation);
+        int bx = (width() - scaled.width()) / 2;
+        int by = (height() - scaled.height()) / 2;
+        p.drawPixmap(bx, by, scaled);
+    }
 
     if (m_showResult) {
         // 只填背景
@@ -395,6 +426,7 @@ void PlayWindow::keyPressEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_Escape) { // 按Esc暂停
         togglePause();
+        m_click2Sfx->play();
         qDebug() << "Esc is pressed.";
         return;
     }
@@ -445,6 +477,8 @@ void PlayWindow::checkTapHit(int lane)
     }
 
     if (bestNote) {
+        // 播放tap音效（TAP和HOLD头部都播）
+        m_tapSfx->play();
         if (bestNote->data.type == NoteData::HOLD) {
             bestNote->holding = true;
             bestNote->wasHeld = true; // 标记曾被按住过，绘制时 head 不突变
@@ -510,6 +544,7 @@ void PlayWindow::checkFlickHit(int deltaY)
 
     if (bestNote) {
         bestNote->judged = true;
+        m_flickSfx->play();
         m_activeFlickLanes.remove(bestNote->data.lane);
         if (minDiff <= 200) {
             QColor col = judgementColor(0);
@@ -589,8 +624,7 @@ int PlayWindow::fps() const {
 
 void PlayWindow::showResult(GameManager *gm)
 {
-    m_showResult = true;
-    update();
+    m_showResult = false; // 暂不直接切黑，用动画过渡
     this->releaseMouse();
 
     // 隐藏 UI 控件...
@@ -610,7 +644,28 @@ void PlayWindow::showResult(GameManager *gm)
         cover.load(m_coverPath);
     }
 
-    // ── 保存游玩记录到 data/play_history.json（最多6条，FIFO）──
+    // ── 创建全屏黑色遮罩，1.5秒淡入 ──
+    QWidget *blackScreen = new QWidget(this);
+    blackScreen->setGeometry(0, 0, width(), height());
+    blackScreen->setStyleSheet("background-color: black;");
+    blackScreen->show();
+    blackScreen->raise();
+
+    QGraphicsOpacityEffect *blackEffect = new QGraphicsOpacityEffect(blackScreen);
+    blackScreen->setGraphicsEffect(blackEffect);
+    blackEffect->setOpacity(0.0);
+
+    QPropertyAnimation *fadeToBlack = new QPropertyAnimation(blackEffect, "opacity", blackScreen);
+    fadeToBlack->setDuration(1500); // 1.5秒
+    fadeToBlack->setStartValue(0.0);
+    fadeToBlack->setEndValue(1.0);
+
+    // 动画完成后展示结算界面
+    connect(fadeToBlack, &QPropertyAnimation::finished, this, [this, gm, cover, blackScreen]() {
+        m_showResult = true;
+        update();
+
+        // ── 保存游玩记录到 data/play_history.json（最多6条，FIFO）──
     // songId = 谱面所在目录名（如 "lovely_picnic"）
     QString songId = QFileInfo(m_chartPath).dir().dirName();
     QString jsonDir  = QCoreApplication::applicationDirPath() + "/data";
@@ -680,17 +735,23 @@ void PlayWindow::showResult(GameManager *gm)
         qDebug() << "All Perfect! apCount:" << apCount;
     }
 
-    // 创建覆盖层
-    ResultOverlay *overlay = new ResultOverlay(gm, m_songTitle, m_songArtist,
-                                               cover, m_difficulty, this);
-    overlay->move(75, 0);
-    overlay->show();
-    overlay->raise();
+        // 创建结算覆盖层
+        ResultOverlay *overlay = new ResultOverlay(gm, m_songTitle, m_songArtist,
+                                                   cover, m_difficulty, this);
+        overlay->move(75, 0);
+        overlay->show();
+        overlay->raise();
 
-    connect(overlay, &ResultOverlay::backToMenu, this, [this]() {
-        emit returnToMenu();  // 通知外部（SongWindow）
-        this->close();        // 关闭游戏窗口
+        // 移除黑色遮罩（已完全黑，肉眼不可见过渡）
+        blackScreen->deleteLater();
+
+        connect(overlay, &ResultOverlay::backToMenu, this, [this]() {
+            emit returnToMenu();  // 通知外部（SongWindow）
+            QTimer::singleShot(100, this, &QWidget::close);
+        });
     });
+
+    fadeToBlack->start(QAbstractAnimation::DeleteWhenStopped);
 }
 
 void PlayWindow::togglePause()
@@ -723,7 +784,8 @@ void PlayWindow::pauseGame()
         connect(m_pauseOverlay, &PauseOverlay::restartGame, this, &PlayWindow::restartGame);
         connect(m_pauseOverlay, &PauseOverlay::backToMenu, this, [this]() {
             emit returnToMenu();
-            this->close();
+            // 延迟关闭，确保 PauseOverlay 的 click4 音效播放完毕
+            QTimer::singleShot(200, this, &QWidget::close);
         });
     }
 

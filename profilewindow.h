@@ -7,6 +7,7 @@
 #include <QMainWindow>
 #include <QPushButton>
 #include <QSettings>
+#include <QSoundEffect>
 
 class MainWindow;
 
@@ -62,6 +63,8 @@ private:
     Ui::ProfileWindow *ui;
     MainWindow *m_mainWin;
     QSettings *m_settings;
+    QSoundEffect *m_click1Sfx = nullptr; // 通用按钮音效
+    QSoundEffect *m_click4Sfx = nullptr; // 返回/功能按钮音效
 
     // 背景图
     QPixmap m_background;

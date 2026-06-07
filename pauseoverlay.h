@@ -6,6 +6,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QSoundEffect>
 
 namespace Ui {
 class PauseOverlay;
@@ -26,6 +27,7 @@ signals:
 
 private:
     Ui::PauseOverlay *ui;
+    QSoundEffect *m_click4Sfx = nullptr; // 功能按钮音效
 
     void setupUI();
 };

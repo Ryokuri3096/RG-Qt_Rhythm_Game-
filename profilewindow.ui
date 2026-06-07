@@ -64,7 +64,7 @@ QPushButton:hover {
 }</string>
     </property>
     <property name="text">
-     <string>&lt; 返回</string>
+     <string>Back</string>
     </property>
    </widget>
    <widget class="QFrame" name="leftPanelFrame">

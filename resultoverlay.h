@@ -7,6 +7,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QPixmap>
+#include <QSoundEffect>
 
 #include "gamemanager.h"
 
@@ -32,6 +33,8 @@ private slots:
 
 private:
     Ui::ResultOverlay *ui;
+    QSoundEffect *m_click4Sfx = nullptr; // 返回按钮音效
+    QSoundEffect *m_overSfx = nullptr;   // 结算循环音效
 
     void setupUI(GameManager *gm, const QString &songTitle,
                  const QString &artist, const QPixmap &cover,

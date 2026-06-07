@@ -1,0 +1,9 @@
+#
+Name: 春日影 (CRYCHIC ver.)
+Path: 9547744153717272
+Song: 9547744153717272.mp3
+Picture: 9547744153717272.jpg
+Chart: 9547744153717272.json
+Level: IN Lv.15
+Composer: CRYCHIC
+Charter: Liko

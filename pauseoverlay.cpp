@@ -8,9 +8,13 @@ PauseOverlay::PauseOverlay(QWidget *parent)
     ui->setupUi(this);
     setStyleSheet("background-color: rgba(0, 0, 0, 200);");
 
-    connect(ui->resumeBtn, &QPushButton::clicked, this, &PauseOverlay::resumeGame);
-    connect(ui->restartBtn, &QPushButton::clicked, this, &PauseOverlay::restartGame);
-    connect(ui->backBtn, &QPushButton::clicked, this, &PauseOverlay::backToMenu);
+    // 初始化按钮音效
+    m_click4Sfx = new QSoundEffect(this);
+    m_click4Sfx->setSource(QUrl("qrc:/sfx/click4.wav"));
+
+    connect(ui->resumeBtn, &QPushButton::clicked, this, [this](){ m_click4Sfx->play(); emit resumeGame(); });
+    connect(ui->restartBtn, &QPushButton::clicked, this, [this](){ m_click4Sfx->play(); emit restartGame(); });
+    connect(ui->backBtn, &QPushButton::clicked, this, [this](){ m_click4Sfx->play(); emit backToMenu(); });
 }
 
 PauseOverlay::~PauseOverlay()

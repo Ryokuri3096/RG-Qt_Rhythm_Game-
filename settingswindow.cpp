@@ -5,6 +5,7 @@
 #include <QPainter>
 #include <QResizeEvent>
 #include <QShowEvent>
+#include <QTimer>
 
 
 SettingsWindow::SettingsWindow(QWidget *parent)
@@ -18,7 +19,7 @@ SettingsWindow::SettingsWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    m_background.load(":/img/mainmenu.png");
+    m_background.load(":/img/play_bp.jpg");
 
     // 从 .ui 中收集控件指针，存入数组方便批量操作
     // [0]=music, [1]=sfx, [2]=speed
@@ -61,6 +62,14 @@ SettingsWindow::SettingsWindow(QWidget *parent)
     m_sliders[2]->setValue(100);
 
     setFocusPolicy(Qt::StrongFocus); // 用于捕获按键重新映射
+
+    // 初始化音效
+    m_click1Sfx = new QSoundEffect(this);
+    m_click1Sfx->setSource(QUrl("qrc:/sfx/click1.wav"));
+    m_click3Sfx = new QSoundEffect(this);
+    m_click3Sfx->setSource(QUrl("qrc:/sfx/click3.wav"));
+    m_click4Sfx = new QSoundEffect(this);
+    m_click4Sfx->setSource(QUrl("qrc:/sfx/click4.wav"));
 
     applyStyles();
     connectSignals();
@@ -174,32 +183,39 @@ void SettingsWindow::onSpeedSliderChanged(int val)
 // 加减按钮
 void SettingsWindow::onMusicMinus()
 {
+    m_click3Sfx->play();
     m_sliders[0]->setValue(qMax(m_sliders[0]->value() - 5, m_sliders[0]->minimum()));
 }
 void SettingsWindow::onMusicPlus()
 {
+    m_click3Sfx->play();
     m_sliders[0]->setValue(qMin(m_sliders[0]->value() + 5, m_sliders[0]->maximum()));
 }
 void SettingsWindow::onSfxMinus()
 {
+    m_click3Sfx->play();
     m_sliders[1]->setValue(qMax(m_sliders[1]->value() - 5, m_sliders[1]->minimum()));
 }
 void SettingsWindow::onSfxPlus()
 {
+    m_click3Sfx->play();
     m_sliders[1]->setValue(qMin(m_sliders[1]->value() + 5, m_sliders[1]->maximum()));
 }
 void SettingsWindow::onSpeedMinus()
 {
+    m_click3Sfx->play();
     m_sliders[2]->setValue(qMax(m_sliders[2]->value() - 5, m_sliders[2]->minimum()));
 }
 void SettingsWindow::onSpeedPlus()
 {
+    m_click3Sfx->play();
     m_sliders[2]->setValue(qMin(m_sliders[2]->value() + 5, m_sliders[2]->maximum()));
 }
 
 // 键位映射按钮点击 — 进入等待按键状态
 void SettingsWindow::onKeyMappingBtnClicked()
 {
+    m_click4Sfx->play();
     QPushButton *btn = qobject_cast<QPushButton*>(sender());
     if (!btn) return;
 
@@ -346,9 +362,11 @@ void SettingsWindow::showEvent(QShowEvent *event)
 // 返回主菜单
 void SettingsWindow::on_backButton_clicked()
 {
+    m_click4Sfx->play();
     if (m_mainWin) {
         m_mainWin->show();
     }
-    this->close();
-    this->deleteLater();
+    this->hide(); // 先隐藏，避免视觉残留
+    // 延迟关闭，确保音效播放完毕
+    QTimer::singleShot(200, this, &QWidget::deleteLater);
 }

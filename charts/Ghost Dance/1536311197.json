@@ -1,46 +1,59 @@
 {
-    "meta": {
-        "creator": "Forever_LingKon",
-        "background": "32s58PICIgC_1024.jpg",
-        "version": "Ghost！！！",
-        "id": 0,
-        "mode": 0,
-        "time": 1536364126,
-        "song": {
-            "title": "Ghost Dance",
-            "artist": "Forever-LingKon",
-            "id": 0
-        },
-        "mode_ext": {
-            "column": 5
-        }
+  "meta": {
+    "creator": "Forever_LingKon",
+    "background": "32s58PICIgC_1024.jpg",
+    "version": "Ghost！！！",
+    "id": 0,
+    "mode": 0,
+    "time": 1536364126,
+    "song": {
+      "title": "Ghost Dance",
+      "artist": "Forever-LingKon",
+      "id": 0,
+      "difficulty": "Ghost!!!"
     },
-    "time": [
-        {
-            "beat": [0,0,1],
-            "bpm": 130.0
-        }
-    ],
-    "note": [
-        {
-            "beat": [0,2,4],
-            "column": 1
-        },
-        {
-            "beat": [0,0,1],
-            "sound": "1536311197.ogg",
-            "vol": 100,
-            "offset": 197,
-            "type": 1
-        }
-    ],
-    "extra": {
-        "test": {
-            "divide": 4,
-            "speed": 100,
-            "save": 0,
-            "lock": 0,
-            "edit_mode": 0
-        }
+    "mode_ext": {
+      "column": 5
     }
+  },
+  "time": [
+    {
+      "beat": [
+        0,
+        0,
+        1
+      ],
+      "bpm": 130.0
+    }
+  ],
+  "note": [
+    {
+      "beat": [
+        0,
+        2,
+        4
+      ],
+      "column": 1
+    },
+    {
+      "beat": [
+        0,
+        0,
+        1
+      ],
+      "sound": "1536311197.ogg",
+      "vol": 100,
+      "offset": 197,
+      "type": 1
+    }
+  ],
+  "extra": {
+    "test": {
+      "divide": 4,
+      "speed": 100,
+      "save": 0,
+      "lock": 0,
+      "edit_mode": 0
+    }
+  }
 }

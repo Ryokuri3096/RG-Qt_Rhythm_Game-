@@ -1,5 +1,6 @@
 #include "resultoverlay.h"
 #include "ui_resultoverlay.h"
+#include <QTimer>
 
 ResultOverlay::ResultOverlay(GameManager *gm, const QString &songTitle,
                              const QString &artist, const QPixmap &cover,
@@ -9,8 +10,20 @@ ResultOverlay::ResultOverlay(GameManager *gm, const QString &songTitle,
 {
     ui->setupUi(this);
 
+    // 初始化返回按钮音效
+    m_click4Sfx = new QSoundEffect(this);
+    m_click4Sfx->setSource(QUrl("qrc:/sfx/click4.wav"));
+
+    // 初始化结算循环音效
+    m_overSfx = new QSoundEffect(this);
+    m_overSfx->setSource(QUrl("qrc:/sfx/over.wav"));
+    m_overSfx->setLoopCount(QSoundEffect::Infinite);
+
     // setStyleSheet("background-color: rgba(0, 0, 0, 200);");
     setupUI(gm, songTitle, artist, cover, difficulty);
+
+    // 开始循环播放结算音效
+    m_overSfx->play();
 }
 
 ResultOverlay::~ResultOverlay()
@@ -43,5 +56,10 @@ void ResultOverlay::setupUI(GameManager *gm, const QString &songTitle,
 }
 void ResultOverlay::on_backButton_clicked()
 {
-    emit backToMenu();
+    m_overSfx->stop(); // 停止结算循环音效
+    m_click4Sfx->play();
+    // 延迟发射信号，确保音效播放完毕再关闭窗口
+    QTimer::singleShot(200, this, [this]() {
+        emit backToMenu();
+    });
 }

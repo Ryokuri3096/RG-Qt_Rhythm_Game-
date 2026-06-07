@@ -7,6 +7,7 @@
 #include <QPushButton>
 #include <QSettings>
 #include <QSlider>
+#include <QSoundEffect>
 #include <QVariant>
 
 class MainWindow;
@@ -77,7 +78,7 @@ private:
     double m_sfxVolume;   // 0.0 ~ 1.0
     double m_speed;       // 0.01 ~ 2.00（流速）
 
-    // 控件指针数组 [music, sfx, speed]（共3项，删除了offset）
+    // 控件指针数组 [music, sfx, speed]
     QSlider *m_sliders[3];
     QLabel *m_valueLabels[3];
     QPushButton *m_minusBtns[3];
@@ -87,6 +88,11 @@ private:
     int m_keyMapping[4];          // 存储 Qt::Key 值
     QPushButton *m_keyBtns[4];    // 四个轨道按钮
     int m_waitingForLane = -1;    // -1=不在等待，0~3=等待用户按下的轨道
+
+    // 音效
+    QSoundEffect *m_click1Sfx = nullptr; // 通用按钮
+    QSoundEffect *m_click3Sfx = nullptr; // 加减号
+    QSoundEffect *m_click4Sfx = nullptr; // 返回/键位按钮
 
     // 背景图
     QPixmap m_background;

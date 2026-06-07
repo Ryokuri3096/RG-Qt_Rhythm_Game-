@@ -1,6 +1,8 @@
 #include "mainwindow.h"
+#include <QEvent>
 #include <QGraphicsDropShadowEffect>
 #include <QLayout>
+#include <QPainter>
 #include <QPropertyAnimation>
 #include <QPushButton>
 #include "./ui_mainwindow.h"
@@ -14,6 +16,26 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     displayShadowForButtons(); //给按钮加上阴影
+
+    // 让标签不拦截点击（点击穿透到下方按钮）
+    ui->playLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
+    ui->profileLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
+    ui->settingsLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
+
+    // 初始化按钮音效（不受sfxVolume控制）
+    m_click1Sfx = new QSoundEffect(this);
+    m_click1Sfx->setSource(QUrl("qrc:/sfx/click1.wav"));
+    m_click3Sfx = new QSoundEffect(this);
+    m_click3Sfx->setSource(QUrl("qrc:/sfx/click3.wav"));
+
+    // 4个按钮安装悬停事件过滤器
+    ui->playButton->installEventFilter(this);
+    ui->profileButton->installEventFilter(this);
+    ui->settingsButton->installEventFilter(this);
+    ui->exitButton->installEventFilter(this);
+
+    // 加载背景图
+    m_background.load(":/img/ttt.png");
 }
 
 MainWindow::~MainWindow()
@@ -21,9 +43,24 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::paintEvent(QPaintEvent *event)
+{
+    Q_UNUSED(event);
+    QPainter painter(this);
+    if (!m_background.isNull()) {
+        QPixmap scaled = m_background.scaled(size(),
+                                              Qt::KeepAspectRatioByExpanding,
+                                              Qt::SmoothTransformation);
+        int x = (width() - scaled.width()) / 2;
+        int y = (height() - scaled.height()) / 2;
+        painter.drawPixmap(x, y, scaled);
+    }
+}
+
 
 void MainWindow::on_playButton_clicked()
 {
+    m_click1Sfx->play();
     qDebug() << "playButton is clicked";
 
     this->hide(); //隐藏当前主窗口
@@ -37,6 +74,7 @@ void MainWindow::on_playButton_clicked()
 
 void MainWindow::on_profileButton_clicked()
 {
+    m_click1Sfx->play();
     qDebug() << "profileButton is clicked";
 
     this->hide(); //隐藏当前主窗口
@@ -49,6 +87,7 @@ void MainWindow::on_profileButton_clicked()
 
 void MainWindow::on_settingsButton_clicked()
 {
+    m_click1Sfx->play();
     qDebug() << "settingsButton is clicked";
 
     this->hide();
@@ -61,7 +100,16 @@ void MainWindow::on_settingsButton_clicked()
 
 void MainWindow::on_exitButton_clicked()
 {
+    m_click1Sfx->play();
     qApp->exit();
+}
+
+bool MainWindow::eventFilter(QObject *obj, QEvent *event)
+{
+    if (event->type() == QEvent::Enter) {
+        m_click3Sfx->play();
+    }
+    return QMainWindow::eventFilter(obj, event);
 }
 
 void MainWindow::displayShadowForButtons()

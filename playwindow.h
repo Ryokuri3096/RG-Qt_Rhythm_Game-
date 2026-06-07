@@ -22,6 +22,7 @@
 #include <QDir>
 #include <QDebug>
 #include <QSettings>
+#include <QSoundEffect>
 #include <QPropertyAnimation>
 #include <QSequentialAnimationGroup>
 #include "gamemanager.h"
@@ -130,6 +131,7 @@ private:
     QSequentialAnimationGroup* m_judgeAnimGroup = nullptr;
     QPixmap m_tapBlue, m_tapRed;
     QPixmap m_holdBodyBlue, m_holdBodyRed;
+    QPixmap m_background; // 游戏背景图
 
     // 当前按住的Hold
     std::vector<GameNote*> m_activeHolds;
@@ -144,6 +146,12 @@ private:
     // 音频播放相关
     QMediaPlayer *m_player = nullptr;
     QAudioOutput *m_audioOutput = nullptr;
+
+    // 音效
+    QSoundEffect *m_tapSfx = nullptr;      // tap/hold头部
+    QSoundEffect *m_flickSfx = nullptr;    // flick
+    QSoundEffect *m_click1Sfx = nullptr;   // 通用按钮
+    QSoundEffect *m_click2Sfx = nullptr;   // Esc暂停
 
     // 定时器
     QTimer *m_gameTimer = nullptr;

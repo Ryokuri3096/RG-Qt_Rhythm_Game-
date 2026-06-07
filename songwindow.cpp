@@ -4,6 +4,7 @@
 #include "mainwindow.h"
 #include "playwindow.h"
 #include "gamemanager.h"
+#include <QTimer>
 
 SongWindow::SongWindow(QMainWindow *parent)
     : QMainWindow(parent)
@@ -13,6 +14,15 @@ SongWindow::SongWindow(QMainWindow *parent)
     ui->setupUi(this);
     ui->startButton->hide();
 
+    // 加载背景图
+    m_background.load(":/img/play_bp.jpg");
+
+    // 初始化按钮音效（不受sfxVolume控制）
+    m_click1Sfx = new QSoundEffect(this);
+    m_click1Sfx->setSource(QUrl("qrc:/sfx/click1.wav"));
+    m_click4Sfx = new QSoundEffect(this);
+    m_click4Sfx->setSource(QUrl("qrc:/sfx/click4.wav"));
+
     loadCharts();
 }
 
@@ -21,16 +31,32 @@ SongWindow::~SongWindow()
     delete ui;
 }
 
+// ── 背景绘制 ──
+void SongWindow::paintEvent(QPaintEvent *event)
+{
+    Q_UNUSED(event);
+    QPainter painter(this);
+    if (!m_background.isNull()) {
+        QPixmap scaled = m_background.scaled(size(),
+                                              Qt::KeepAspectRatioByExpanding,
+                                              Qt::SmoothTransformation);
+        int x = (width() - scaled.width()) / 2;
+        int y = (height() - scaled.height()) / 2;
+        painter.drawPixmap(x, y, scaled);
+    }
+}
+
 void SongWindow::on_backButton_clicked()
 {
+    m_click4Sfx->play();
     qDebug() << "backButton is clicked";
 
     if (m_mainWin) {
         m_mainWin->show(); // 显示原来的主窗口
     }
 
-    this->close();       //关闭自己
-    this->deleteLater(); // 安全释放自己
+    // 延迟关闭，确保音效播放完毕
+    QTimer::singleShot(200, this, &QWidget::deleteLater);
 }
 
 // 保存主窗口指针的函数
@@ -60,7 +86,10 @@ void SongWindow::loadCharts()
     nameFilters << "*.json";
     QDirIterator it(chartsRoot, nameFilters, QDir::Files, QDirIterator::Subdirectories);
 
-    QMap<QString, QJsonObject> chartData;
+    QString firstSongPath;      // 第一首歌的路径
+    QJsonObject firstSongJson;  // 第一首歌的JSON数据
+    bool isFirst = true;
+
     while (it.hasNext()) {
         it.next();
         QFileInfo fileInfo = it.fileInfo();
@@ -75,22 +104,52 @@ void SongWindow::loadCharts()
         }
         loadedData.insert(absolutePath, jsonObj); // 保存数据
 
-        // 从 JSON 中提取按钮文本
-        QJsonObject metaObj = jsonObj.value("meta").toObject();
-        QJsonObject songObj = metaObj.value("song").toObject();
-        QString btnText = songObj.value("title").toString();
-        if (btnText.isEmpty()) {
-            btnText = relativePath; // 如果 JSON 中没有 name，回退为相对路径
+        // 记录第一首有效歌曲，用于默认展示
+        if (isFirst) {
+            firstSongPath = absolutePath;
+            firstSongJson = jsonObj;
+            isFirst = false;
         }
 
-        // 创建按钮 设置按钮样式
-        QPushButton *btn = new QPushButton(btnText, container);
-        btn->setMinimumHeight(100);
-        // btn->setStyleSheet(R"(QPushButton:hover {border: 1px solid #5078a0;border-radius: 2px;})");
+        // 从 JSON 中提取按钮文本和等级
+        QJsonObject metaObj = jsonObj.value("meta").toObject();
+        QJsonObject songObj = metaObj.value("song").toObject();
+        QString songTitle = songObj.value("title").toString();
+        if (songTitle.isEmpty()) {
+            songTitle = relativePath; // 如果 JSON 中没有 name，回退为相对路径
+        }
+        QString difficulty = songObj.value("difficulty").toString("?");
+
+        // 创建按钮：内嵌 layout，曲名居左 + 等级居右
+        QPushButton *btn = new QPushButton(container);
+        btn->setMinimumHeight(90);
+        btn->setCursor(Qt::PointingHandCursor);
+        btn->setStyleSheet("QPushButton {"
+                           "  background: rgba(255,255,255,15);"
+                           "  border: 1px solid rgba(255,255,255,40);"
+                           "  border-radius: 6px;"
+                           "}"
+                           "QPushButton:hover {"
+                           "  background: rgba(255,255,255,40);"
+                           "  border: 1px solid rgba(255,255,255,100);"
+                           "}");
+
+        QHBoxLayout *btnLayout = new QHBoxLayout(btn);
+        btnLayout->setContentsMargins(14, 0, 14, 0);
+
+        QLabel *titleLbl = new QLabel(songTitle, btn);
+        titleLbl->setStyleSheet("color: white; font-size: 20px; font-family: 'Exo'; background: transparent; border: none;");
+        QLabel *diffLbl = new QLabel(QString("Lv.%1").arg(difficulty), btn);
+        diffLbl->setStyleSheet("color: #88bbee; font-size: 20px; font-family: 'Exo'; background: transparent; border: none;");
+
+        btnLayout->addWidget(titleLbl);
+        btnLayout->addStretch();
+        btnLayout->addWidget(diffLbl);
 
         // 连接点击信号
-        connect(btn, &QPushButton::clicked, this, [this, absolutePath, btnText, jsonObj]() {
-            qDebug() << "Clicked:" << btnText;
+        connect(btn, &QPushButton::clicked, this, [this, absolutePath, songTitle, jsonObj]() {
+            m_click4Sfx->play();
+            qDebug() << "Clicked:" << songTitle;
             updateLeftPanel(absolutePath, jsonObj);
             ui->startButton->show();
             songPath = absolutePath;
@@ -105,6 +164,13 @@ void SongWindow::loadCharts()
     // 设置到 QScrollArea
     ui->chooseArea->setWidgetResizable(true);
     ui->chooseArea->setWidget(container);
+
+    // 默认展示第一首歌曲的简介和曲绘
+    if (!firstSongPath.isEmpty()) {
+        updateLeftPanel(firstSongPath, firstSongJson);
+        ui->startButton->show();
+        songPath = firstSongPath;
+    }
 }
 
 QJsonObject SongWindow::loadJsonFile(const QString &path)
@@ -190,6 +256,7 @@ void SongWindow::updateLeftPanel(const QString &jsonPath, const QJsonObject &jso
 
 void SongWindow::on_startButton_clicked()
 {
+    m_click1Sfx->play();
     // 创建游戏管理器
     GameManager *gameManager = new GameManager(this);
     gameManager->reset();

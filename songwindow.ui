@@ -145,6 +145,20 @@ QScrollArea:hover {
      <height>51</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton {
+      color: white;
+      font-size: 22px;
+      font-family: 'Exo';
+      background: rgba(255,255,255,20);
+      border: 1px solid rgba(255,255,255,50);
+      border-radius: 6px;
+    }
+    QPushButton:hover {
+      background: rgba(255,255,255,60);
+      border: 1px solid rgba(255,255,255,150);
+    }</string>
+   </property>
    <property name="text">
     <string>GAME START</string>
    </property>

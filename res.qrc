@@ -1,7 +1,9 @@
 <RCC>
     <qresource prefix="/">
-        <file>img/mainmenu.png</file>
+        <file>img/mainmenu.jpg</file>
+        <file>img/ttt.png</file>
         <file>img/Play.png</file>
+        <file>img/play_bp.jpg</file>
         <file>img/Profile.jpg</file>
         <file>img/Settings.jpg</file>
         <file>fonts/Exo.ttf</file>
@@ -15,5 +17,12 @@
         <file>img/hold_red.png</file>
         <file>img/note_blue.png</file>
         <file>img/note_red.png</file>
+        <file>sfx/tap.wav</file>
+        <file>sfx/flick.wav</file>
+        <file>sfx/click1.wav</file>
+        <file>sfx/click2.wav</file>
+        <file>sfx/click3.wav</file>
+        <file>sfx/click4.wav</file>
+        <file>sfx/over.wav</file>
     </qresource>
 </RCC>

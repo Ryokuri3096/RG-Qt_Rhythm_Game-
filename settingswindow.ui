@@ -42,7 +42,7 @@
              background: rgba(255, 255, 255, 50);
          }</string>
         </property>
-        <property name="text"><string>&lt; 返回</string></property>
+        <property name="text"><string>Back</string></property>
        </widget>
       </item>
       <item>

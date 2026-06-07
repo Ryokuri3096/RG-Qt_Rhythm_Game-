@@ -15,6 +15,7 @@
 #include <QResizeEvent>
 #include <QShowEvent>
 #include <QStandardPaths>
+#include <QTimer>
 
 
 ProfileWindow::ProfileWindow(QWidget *parent)
@@ -25,8 +26,15 @@ ProfileWindow::ProfileWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    // 音效最先初始化，避免后续重操作干扰音频状态
+    m_click4Sfx = new QSoundEffect(this);
+    m_click4Sfx->setSource(QUrl("qrc:/sfx/click4.wav"));
+    m_click4Sfx->setVolume(0.8); // 稍降音量防破音
+    m_click1Sfx = new QSoundEffect(this);
+    m_click1Sfx->setSource(QUrl("qrc:/sfx/click1.wav"));
+
     // 加载背景图（与主菜单背景一致）
-    m_background.load(":/img/mainmenu.png");
+    m_background.load(":/img/play_bp.jpg");
 
     // 收集右侧6张游玩记录卡片的子控件指针
     // 卡片 QFrame
@@ -225,12 +233,13 @@ void ProfileWindow::updateOverlayPos()
 // 返回主菜单
 void ProfileWindow::on_backButton_clicked()
 {
+    m_click4Sfx->play();
     qDebug() << "profile backButton is clicked";
     if (m_mainWin) {
         m_mainWin->show();
     }
-    this->close();
-    this->deleteLater();
+    // 延迟关闭，确保音效播放完毕（不hide避免打断音频线程）
+    QTimer::singleShot(300, this, &QWidget::deleteLater);
 }
 
 // 昵称编辑：标签→输入框
