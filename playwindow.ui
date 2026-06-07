@@ -174,7 +174,7 @@ color:white;</string>
       <x>260</x>
       <y>400</y>
       <width>91</width>
-      <height>261</height>
+      <height>251</height>
      </rect>
     </property>
     <property name="font">
@@ -198,7 +198,7 @@ color:white;</string>
      <rect>
       <x>10</x>
       <y>400</y>
-      <width>231</width>
+      <width>250</width>
       <height>251</height>
      </rect>
     </property>

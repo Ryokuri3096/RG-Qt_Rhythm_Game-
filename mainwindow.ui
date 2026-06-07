@@ -46,13 +46,18 @@
    </property>
    <widget class="QLabel" name="titleLabel">
     <property name="geometry">
-     <rect><x>40</x><y>92</y><width>500</width><height>200</height></rect>
+     <rect>
+      <x>40</x>
+      <y>92</y>
+      <width>500</width>
+      <height>200</height>
+     </rect>
     </property>
     <property name="styleSheet">
      <string notr="true">color: white; background: transparent;</string>
     </property>
     <property name="text">
-     <string>&lt;p style="font-family:'Exo'; font-size:72px; margin:0; color:white;"&gt;RHYTHM GAME&lt;/p&gt;&lt;p style="font-family:'Exo'; font-size:48px; margin:0; color:white;"&gt;by Team P.J.S.K&lt;/p&gt;</string>
+     <string>&lt;p style=&quot;font-family:'Exo'; font-size:72px; margin:0; color:white;&quot;&gt;RHYTHM GAME&lt;/p&gt;&lt;p style=&quot;font-family:'Exo'; font-size:48px; margin:0; color:white;&quot;&gt;by Team P.J.S.K&lt;/p&gt;</string>
     </property>
    </widget>
    <widget class="QPushButton" name="playButton">
@@ -80,7 +85,12 @@ background: rgba(60, 60, 60, 200);
    </widget>
    <widget class="QLabel" name="playLabel">
     <property name="geometry">
-     <rect><x>600</x><y>40</y><width>641</width><height>311</height></rect>
+     <rect>
+      <x>600</x>
+      <y>40</y>
+      <width>641</width>
+      <height>311</height>
+     </rect>
     </property>
     <property name="styleSheet">
      <string notr="true">color: #88bbee; font-size: 72px; font-family: 'GeosansLight'; background: transparent;</string>
@@ -117,7 +127,12 @@ background: rgba(60, 60, 60, 200);
    </widget>
    <widget class="QLabel" name="profileLabel">
     <property name="geometry">
-     <rect><x>600</x><y>390</y><width>312</width><height>214</height></rect>
+     <rect>
+      <x>600</x>
+      <y>390</y>
+      <width>312</width>
+      <height>214</height>
+     </rect>
     </property>
     <property name="styleSheet">
      <string notr="true">color: #88bbee; font-size: 48px; font-family: 'GeosansLight'; background: transparent;</string>
@@ -154,7 +169,12 @@ background: rgba(60, 60, 60, 200);
    </widget>
    <widget class="QLabel" name="settingsLabel">
     <property name="geometry">
-     <rect><x>930</x><y>390</y><width>312</width><height>214</height></rect>
+     <rect>
+      <x>930</x>
+      <y>390</y>
+      <width>312</width>
+      <height>214</height>
+     </rect>
     </property>
     <property name="styleSheet">
      <string notr="true">color: #88bbee; font-size: 48px; font-family: 'GeosansLight'; background: transparent;</string>
@@ -194,13 +214,18 @@ background: rgba(60, 60, 60, 200);
    </widget>
    <widget class="QLabel" name="creditLabel">
     <property name="geometry">
-     <rect><x>20</x><y>665</y><width>650</width><height>45</height></rect>
+     <rect>
+      <x>20</x>
+      <y>665</y>
+      <width>650</width>
+      <height>45</height>
+     </rect>
     </property>
     <property name="styleSheet">
      <string notr="true">background: transparent;</string>
     </property>
     <property name="text">
-     <string>&lt;p style="margin:0;"&gt;&lt;span style="font-family:'GeosansLight'; font-size:28px; color:#333333;"&gt;background picture from &lt;/span&gt;&lt;span style="font-family:'Exo'; font-size:28px; color:#333333;"&gt;Nanatsukaze - 再生&lt;/span&gt;&lt;/p&gt;</string>
+     <string>&lt;p style=&quot;margin:0;&quot;&gt;&lt;span style=&quot;font-family:'GeosansLight'; font-size:28px; color:#333333;&quot;&gt;background picture from &lt;/span&gt;&lt;span style=&quot;font-family:'Exo'; font-size:28px; color:#333333;&quot;&gt;Nanatsukaze - 再生&lt;/span&gt;&lt;/p&gt;</string>
     </property>
    </widget>
   </widget>

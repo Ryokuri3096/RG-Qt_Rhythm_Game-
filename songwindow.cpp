@@ -232,7 +232,7 @@ void SongWindow::updateLeftPanel(const QString &jsonPath, const QJsonObject &jso
 
     QString title = songObj.value("title").toString("unknown");
     QString artist = songObj.value("artist").toString("unknown");
-    QString difficulty = metaObj.value("version").toString("?");
+    QString difficulty = songObj.value("difficulty").toString("?");
 
     QString infoHtml = QString(
                            "<table width='100%' cellspacing='0' cellpadding='0' style='color:white;'>"
@@ -308,16 +308,16 @@ void SongWindow::judgementManage(PlayWindow *play, const QString &text, GameMana
     QString textShowed = mystery + text + mystery; // 神秘符号装饰
     play->getUI()->labelJudgement->setText(textShowed);
     if (text == "PERFECT")
-        play->getUI()->labelJudgement->setStyleSheet(QString("color: qlineargradient(x1:0, x2:0, y1:1, y2:0, stop:0 #FF7A00, stop:1 #FFD700); font-family: Kazesawa;"));
+        play->getUI()->labelJudgement->setStyleSheet(QString("color: qlineargradient(x1:0, x2:0, y1:1, y2:0, stop:0 #FF7A00, stop:1 #FFD700); font-family: Exo;"));
     else if (text == "GREAT")
-        play->getUI()->labelJudgement->setStyleSheet(QString("color: qlineargradient(x1:0, x2:0, y1:1, y2:0, stop:0 #FF1493, stop:1 #FFB6C1); font-family: Kazesawa;"));
+        play->getUI()->labelJudgement->setStyleSheet(QString("color: qlineargradient(x1:0, x2:0, y1:1, y2:0, stop:0 #FF1493, stop:1 #FFB6C1); font-family: Exo;"));
     else if (text == "GOOD")
-        play->getUI()->labelJudgement->setStyleSheet(QString("color: qlineargradient(x1:0, x2:0, y1:1, y2:0, stop:0 #008000, stop:1 #90EE90); font-family: Kazesawa;"));
+        play->getUI()->labelJudgement->setStyleSheet(QString("color: qlineargradient(x1:0, x2:0, y1:1, y2:0, stop:0 #008000, stop:1 #90EE90); font-family: Exo;"));
     else
-        play->getUI()->labelJudgement->setStyleSheet(QString("color: qlineargradient(x1:0, x2:0, y1:1, y2:0, stop:0 #696969, stop:1 #D3D3D3); font-family: Kazesawa;"));
+        play->getUI()->labelJudgement->setStyleSheet(QString("color: qlineargradient(x1:0, x2:0, y1:1, y2:0, stop:0 #696969, stop:1 #D3D3D3); font-family: Exo;"));
     play->getUI()->labelNote->setText(QString("<span style='color:white;'>%1</span><br>"
-                                   "<span style='color:white;'>%2</span><br>"
-                                   "<span style='color:white;'>%3</span><br>"
-                                   "<span style='color:white;'>%4</span><br>"
+                                    "<span style='color:white;'>%2</span><br>"
+                                    "<span style='color:white;'>%3</span><br>"
+                                    "<span style='color:white;'>%4</span><br>"
                                               "<span style='color:white;'>%5</span>").arg(gm->maxCombo()).arg(gm->perfectCount()).arg(gm->greatCount()).arg(gm->goodCount()).arg(gm->missCount()));
 }

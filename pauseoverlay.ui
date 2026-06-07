@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>200</height>
+    <width>480</width>
+    <height>260</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,14 +21,14 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>381</width>
-     <height>81</height>
+     <width>461</width>
+     <height>130</height>
     </rect>
    </property>
    <property name="font">
     <font>
      <family>GeosansLight</family>
-     <pointsize>24</pointsize>
+     <pointsize>48</pointsize>
     </font>
    </property>
    <property name="styleSheet">
@@ -46,9 +46,9 @@ background-color: rgba(0, 0, 0, 200);</string>
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>100</y>
-     <width>381</width>
-     <height>81</height>
+     <y>140</y>
+     <width>461</width>
+     <height>111</height>
     </rect>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout">
@@ -56,12 +56,12 @@ background-color: rgba(0, 0, 0, 200);</string>
      <widget class="QPushButton" name="resumeBtn">
       <property name="font">
        <font>
-        <family>Kazesawa</family>
-        <pointsize>12</pointsize>
+        <family>GeosansLight</family>
+        <pointsize>16</pointsize>
        </font>
       </property>
       <property name="styleSheet">
-       <string notr="true"/>
+       <string notr="true">font-family: &quot;GeosansLight&quot;;</string>
       </property>
       <property name="text">
        <string>Resume</string>
@@ -72,12 +72,12 @@ background-color: rgba(0, 0, 0, 200);</string>
      <widget class="QPushButton" name="restartBtn">
       <property name="font">
        <font>
-        <family>Kazesawa</family>
-        <pointsize>12</pointsize>
+        <family>GeosansLight</family>
+        <pointsize>16</pointsize>
        </font>
       </property>
       <property name="styleSheet">
-       <string notr="true"/>
+       <string notr="true">font-family: &quot;GeosansLight&quot;;</string>
       </property>
       <property name="text">
        <string>Restart</string>
@@ -88,12 +88,12 @@ background-color: rgba(0, 0, 0, 200);</string>
      <widget class="QPushButton" name="backBtn">
       <property name="font">
        <font>
-        <family>Kazesawa</family>
-        <pointsize>12</pointsize>
+        <family>GeosansLight</family>
+        <pointsize>16</pointsize>
        </font>
       </property>
       <property name="styleSheet">
-       <string notr="true"/>
+       <string notr="true">font-family: &quot;GeosansLight&quot;;</string>
       </property>
       <property name="text">
        <string>Back</string>

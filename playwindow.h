@@ -118,6 +118,7 @@ private:
     float m_baseSpeed = 1.00f; // 基础下落速度 单位为px/ms（settings可调0.01~2.00）
     int m_fps = 60; // 帧率 默认60
     bool m_gameEnded = false; // 记录游戏是否结束 防止重复发射
+    bool m_gameStarted = false;
     bool m_showResult = false; // 是否处于结算前清理状态
     QList<HitEffect> m_effects; // 打击特效
 

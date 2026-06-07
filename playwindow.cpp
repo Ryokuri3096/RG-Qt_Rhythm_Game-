@@ -28,7 +28,7 @@ PlayWindow::PlayWindow(QWidget *parent)
     m_gameTimer = new QTimer(this); // 循环定时器
     connect(m_gameTimer, &QTimer::timeout, this, &PlayWindow::gameLoop);
 
-    // 初始化音效（资源文件嵌入exe，跨设备通用）
+    // 初始化音效
     m_tapSfx = new QSoundEffect(this);
     m_tapSfx->setSource(QUrl("qrc:/sfx/tap.wav"));
     m_flickSfx = new QSoundEffect(this);
@@ -41,7 +41,7 @@ m_click2Sfx->setSource(QUrl("qrc:/sfx/click2.wav"));
 
     m_judgementOrigin = ui->labelJudgement->pos();
 
-    // 加载游戏背景图（构造函数最后，不干扰音效初始化）
+    // 加载游戏背景图
     m_background.load(":/img/play_bp.jpg");
 }
 
@@ -74,13 +74,14 @@ void PlayWindow::loadChart(const QString &chartPath, GameManager &gameManager)
     m_holdBodyRed.load(":/img/hold_red.png");
 
     // 获取曲绘 乐曲名 作者 难度并显示
-    QJsonObject meta = root["meta"].toObject();
-    m_songTitle = meta["song"].toObject()["title"].toString();
-    m_songArtist = meta["song"].toObject()["artist"].toString();
+    QJsonObject metaObj = root["meta"].toObject();
+    QJsonObject songObj = metaObj.value("song").toObject();
+    m_songTitle = metaObj["song"].toObject()["title"].toString();
+    m_songArtist = metaObj["song"].toObject()["artist"].toString();
     ui->labelTitle->setText(m_songTitle + " / " +m_songArtist);
     ui->labelTitle->hide();
-    m_difficulty = meta["version"].toString();
-    QString bgFile = meta["background"].toString();
+    m_difficulty = songObj["difficulty"].toString();
+    QString bgFile = metaObj["background"].toString();
     m_coverPath = QFileInfo(chartPath).absolutePath() + "/" + bgFile;
 
     // 获取音频文件名
@@ -171,6 +172,7 @@ void PlayWindow::loadChart(const QString &chartPath, GameManager &gameManager)
 
     qDebug() << audioPath + '/' + audioFileName;
     m_player->setSource(QUrl::fromLocalFile(audioPath + '/' + audioFileName)); // 把音乐加入播放器
+    loadGui();
 }
 
 void PlayWindow::loadSettings()
@@ -209,6 +211,7 @@ void PlayWindow::startGame()
     loadSettings();
 
     // 游戏初始化
+    m_gameStarted = true;
     m_elapsed.start();
     m_musicStartOffset = 0;
     this->grabMouse(); // 让窗口独占鼠标事件
@@ -303,10 +306,27 @@ void PlayWindow::paintEvent(QPaintEvent *)
     p.setPen(QPen(QColor(255, 255, 255, 80), 3));
     for (int i = 0; i <= 4; ++i) {
         int x = offsetX + i * leftLaneW;
-        p.drawLine(x, 0, x, h);
+        p.setPen(QPen(QColor(255, 255, 255, 80), 3));
+        if (i == 1)
+            p.setPen(QPen(QColor(5, 56, 99, 80), 3));
+        else if (i == 2)
+            p.setPen(QPen(QColor(68, 53, 122, 80), 3));
+        else if (i == 3)
+            p.setPen(QPen(QColor(95, 2, 59, 80), 3));
+        else
+            p.setPen(QPen(QColor(255, 255, 255, 80), 3));
+        p.drawLine(x, 0, x, m_hitLineY);
+        if (i == 0 || i == 4) {
+            p.setPen(QPen(QColor(255, 255, 255, 80), 3));
+            p.drawLine(x, m_hitLineY, x, h);
+        } else {
+            p.setPen(QPen(QColor(64, 64, 64, 80), 3));
+            p.drawLine(x, m_hitLineY, x, h);
+        }
     }
     // 最后一轨的右边界
     int xRight = offsetX + 4 * leftLaneW + rightLaneW;
+    p.setPen(QPen(QColor(255, 255, 255, 80), 3));
     p.drawLine(xRight, 0, xRight, h);
 
     // 判定线
@@ -425,6 +445,7 @@ void PlayWindow::paintEvent(QPaintEvent *)
 void PlayWindow::keyPressEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_Escape) { // 按Esc暂停
+        if (!m_gameStarted) return;
         togglePause();
         m_click2Sfx->play();
         qDebug() << "Esc is pressed.";
@@ -450,11 +471,9 @@ void PlayWindow::mouseMoveEvent(QMouseEvent *event)
 {
     int deltaY = event->globalPos().y() - m_lastMousePos.y();
     m_lastMousePos = event->globalPos();
-    qDebug()<<m_lastMousePos;
-    if (this->mouseGrabber() == this) qDebug()<<"grabed";
-
+    // qDebug() << m_lastMousePos;
+    // if (this->mouseGrabber() == this) qDebug()<<"grabed";
     if (qAbs(deltaY) < 10) return; // 鼠标纵向移动距离大于10px才判定
-
     checkFlickHit(deltaY);
 }
 
@@ -789,8 +808,8 @@ void PlayWindow::pauseGame()
         });
     }
 
-    int x = (1280 - 400) / 2;
-    int y = (720 - 200) / 2;
+    int x = (1280 - 480) / 2;
+    int y = (720 - 260) / 2;
     qDebug() << x << ',' << y;
     m_pauseOverlay->move(x, y);
     m_pauseOverlay->show();
