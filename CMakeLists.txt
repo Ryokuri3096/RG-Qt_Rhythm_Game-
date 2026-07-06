@@ -84,13 +84,10 @@ if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(RG)
 endif()
 
-# 由于程序只能读取.exe文件所在目录（\RG\build\Desktop_x86_windows_msys_pe_64bit-Debug）的文件 所以要先把charts文件夹复制过去
 add_custom_command(
     TARGET ${PROJECT_NAME} POST_BUILD
-    # 先删除目标目录（如果存在）
     COMMAND ${CMAKE_COMMAND} -E remove_directory
         "$<TARGET_FILE_DIR:${PROJECT_NAME}>/charts"
-    # 再复制整个源目录过去
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_SOURCE_DIR}/charts"
         "$<TARGET_FILE_DIR:${PROJECT_NAME}>/charts"

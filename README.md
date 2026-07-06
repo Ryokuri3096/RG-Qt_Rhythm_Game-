@@ -53,3 +53,9 @@
 - AP\FC\clear数统计
 - 各曲目最高分与最高评级
 - 数据储存与账户的关联
+
+---
+
+## 演示视频
+
+https://disk.pku.edu.cn/link/AR7AA14CC8D7AE409C81474691E4E439CA

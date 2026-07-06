@@ -28,7 +28,6 @@ void fontInit()
         QStringList exoFamilies = QFontDatabase::applicationFontFamilies(exoRegularId);
         if (!exoFamilies.isEmpty()) {
             QString exoFamily = exoFamilies.first();
-            // qDebug() << "Exo-Regular字体家族名称：" << exoFamily; // "Exo"
         }
     }
 
@@ -37,11 +36,9 @@ void fontInit()
     if (geoSansId == -1) {
         qWarning() << "GeosansLight-1字体加载失败！";
     } else {
-        // 获取字体家族名称
         QStringList geoFamilies = QFontDatabase::applicationFontFamilies(geoSansId);
         if (!geoFamilies.isEmpty()) {
             QString geoFamily = geoFamilies.first();
-            // qDebug() << "GeosansLight-1字体家族名称：" << geoFamily; // "GeosansLight"
         }
     }
 
@@ -50,11 +47,9 @@ void fontInit()
     if (kazeId == -1) {
         qWarning() << "Kazesawa-Regular字体加载失败！";
     } else {
-        // 获取字体家族名称
         QStringList kazeFamilies = QFontDatabase::applicationFontFamilies(kazeId);
         if (!kazeFamilies.isEmpty()) {
             QString kazeFamily = kazeFamilies.first();
-            // qDebug() << "Kazesawa-Regular字体家族名称：" << kazeFamily; // "Kazesawa"
         }
     }
 }

@@ -179,20 +179,20 @@ void PlayWindow::loadSettings()
 {
     QSettings settings("RG", "Settings");
 
-    // 从 settingswindow 读取音乐音量（0~100 → 0.0~1.0）
+    // 从 settingswindow 读取音乐音量
     int vol = settings.value("audio/musicVolume", 100).toInt();
     m_audioOutput->setVolume(vol / 100.0);
 
-    // 读取流速（1~200 → 0.01~2.00）
+    // 读取流速
     int spd = settings.value("gameplay/speed", 100).toInt();
     m_baseSpeed = spd / 100.0;
 
-    // 音效音量只控制音符音效（tap/flick）
+    // 音效音量只控制音符音效
     double sfxVol = settings.value("audio/sfxVolume", 100).toInt() / 100.0;
     m_tapSfx->setVolume(sfxVol);
     m_flickSfx->setVolume(sfxVol);
 
-    // 读取键位映射（四个轨道各存一个 Qt::Key 值）
+    // 读取键位映射
     int defaultKeys[4] = {Qt::Key_S, Qt::Key_D, Qt::Key_J, Qt::Key_K};
     m_keyLaneMap.clear();
     for (int i = 0; i < 4; i++) {
@@ -274,7 +274,6 @@ void PlayWindow::paintEvent(QPaintEvent *)
     }
 
     if (m_showResult) {
-        // 只填背景
         p.fillRect(rect(), QColor(20, 20, 30));
         return;
     }
@@ -496,14 +495,12 @@ void PlayWindow::checkTapHit(int lane)
     }
 
     if (bestNote) {
-        // 播放tap音效（TAP和HOLD头部都播）
+        // 播放tap音效
         m_tapSfx->play();
         if (bestNote->data.type == NoteData::HOLD) {
             bestNote->holding = true;
-            bestNote->wasHeld = true; // 标记曾被按住过，绘制时 head 不突变
+            bestNote->wasHeld = true;
             m_activeHolds.push_back(bestNote);
-            // HOLD头部判定：头部在判定线以上(提前按) → 强制Perfect
-            // 头部已过判定线(按晚) → 按原diff分段
             qint64 headDiff = (curTime > bestNote->data.timeMs) ? minDiff : 0;
             QColor col = judgementColor(headDiff);
             m_effects.append({bestNote->data.lane, col, currentMusicTime()});
@@ -643,10 +640,10 @@ int PlayWindow::fps() const {
 
 void PlayWindow::showResult(GameManager *gm)
 {
-    m_showResult = false; // 暂不直接切黑，用动画过渡
+    m_showResult = false;
     this->releaseMouse();
 
-    // 隐藏 UI 控件...
+    // 隐藏 UI 控件
     ui->labelScore->hide();
     ui->labelCombo->hide();
     ui->labelAccuracy->hide();
@@ -663,7 +660,6 @@ void PlayWindow::showResult(GameManager *gm)
         cover.load(m_coverPath);
     }
 
-    // ── 创建全屏黑色遮罩，1.5秒淡入 ──
     QWidget *blackScreen = new QWidget(this);
     blackScreen->setGeometry(0, 0, width(), height());
     blackScreen->setStyleSheet("background-color: black;");
@@ -675,7 +671,7 @@ void PlayWindow::showResult(GameManager *gm)
     blackEffect->setOpacity(0.0);
 
     QPropertyAnimation *fadeToBlack = new QPropertyAnimation(blackEffect, "opacity", blackScreen);
-    fadeToBlack->setDuration(1500); // 1.5秒
+    fadeToBlack->setDuration(1500);
     fadeToBlack->setStartValue(0.0);
     fadeToBlack->setEndValue(1.0);
 
@@ -684,8 +680,7 @@ void PlayWindow::showResult(GameManager *gm)
         m_showResult = true;
         update();
 
-        // ── 保存游玩记录到 data/play_history.json（最多6条，FIFO）──
-    // songId = 谱面所在目录名（如 "lovely_picnic"）
+    // songId = 谱面所在目录名
     QString songId = QFileInfo(m_chartPath).dir().dirName();
     QString jsonDir  = QCoreApplication::applicationDirPath() + "/data";
     QString jsonPath = jsonDir + "/play_history.json";
@@ -701,8 +696,7 @@ void PlayWindow::showResult(GameManager *gm)
         readFile.close();
     }
 
-    // 构建新记录（插到最前面）
-    // 曲绘路径存相对于exe目录的相对路径，换设备也能加载
+    // 构建新记录
     QString relativeCover = QDir(QCoreApplication::applicationDirPath()).relativeFilePath(m_coverPath);
     QJsonObject newRec;
     newRec["songId"]    = songId;
@@ -726,7 +720,7 @@ void PlayWindow::showResult(GameManager *gm)
         qDebug() << "play history saved to" << jsonPath << ", count:" << historyArr.size();
     }
 
-    // ── 更新统计数据（Clear / Full Combo / All Perfect）──
+    // 更新统计数据
     QSettings profileSettings("RG", "Profile");
 
     // 判断是否首次游玩该曲目 → clear+1
@@ -761,11 +755,11 @@ void PlayWindow::showResult(GameManager *gm)
         overlay->show();
         overlay->raise();
 
-        // 移除黑色遮罩（已完全黑，肉眼不可见过渡）
+        // 移除黑色遮罩
         blackScreen->deleteLater();
 
         connect(overlay, &ResultOverlay::backToMenu, this, [this]() {
-            emit returnToMenu();  // 通知外部（SongWindow）
+            emit returnToMenu();
             QTimer::singleShot(100, this, &QWidget::close);
         });
     });
@@ -829,7 +823,7 @@ void PlayWindow::resumeGame()
 
     // 补偿暂停期间流逝的时间
     qint64 now = m_elapsed.elapsed();
-    m_musicStartOffset -= (now - m_pausedTime);   // 将暂停时长从偏移中扣除
+    m_musicStartOffset -= (now - m_pausedTime);
 
     // 恢复音频
     m_player->play();

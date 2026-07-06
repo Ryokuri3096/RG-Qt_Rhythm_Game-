@@ -90,13 +90,13 @@ private:
         bool missed = false;
         bool judged = false;
         bool holding = false;
-        bool wasHeld = false; // 是否曾进入按住状态（用于区分"断掉"还是"从未接住"）
+        bool wasHeld = false; // 是否曾进入按住状态
     };
 
     struct HitEffect { // 特效结构体
         int lane;
         QColor color;
-        qint64 startTime; // 当前音乐时间（ms）
+        qint64 startTime; // 当前音乐时间
         static constexpr int duration = 300; // 持续 300ms
     };
 
@@ -115,7 +115,7 @@ private:
     QElapsedTimer m_elapsed; // 游戏时长
     qint64 m_musicStartOffset = 0; // 偏移量
     int m_hitLineY = 0; // 判定线Y坐标
-    float m_baseSpeed = 1.00f; // 基础下落速度 单位为px/ms（settings可调0.01~2.00）
+    float m_baseSpeed = 1.00f; // 基础下落速度
     int m_fps = 60; // 帧率 默认60
     bool m_gameEnded = false; // 记录游戏是否结束 防止重复发射
     bool m_gameStarted = false;

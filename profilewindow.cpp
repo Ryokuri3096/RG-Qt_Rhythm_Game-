@@ -131,7 +131,6 @@ void ProfileWindow::applyStyles()
                                           Qt::SmoothTransformation);
         ui->avatarLabel->setPixmap(scaled);
     }
-    // 若加载了自定义头像，清除默认背景图避免从边缘透出
     if (hasCustomAvatar) {
         ui->avatarLabel->setStyleSheet("background: transparent; border: none;");
     }
@@ -238,7 +237,7 @@ void ProfileWindow::on_backButton_clicked()
     if (m_mainWin) {
         m_mainWin->show();
     }
-    // 延迟关闭，确保音效播放完毕（不hide避免打断音频线程）
+    // 延迟关闭，确保音效播放完毕
     QTimer::singleShot(300, this, &QWidget::deleteLater);
 }
 
@@ -391,7 +390,6 @@ void ProfileWindow::refreshCardDisplay()
         QPixmap coverPix;
         if (i < count) {
             const PlayRecord &rec = m_playHistory[i];
-            // 兼容旧绝对路径 + 新相对路径
             QString resolvedPath = rec.coverPath;
             if (QDir::isRelativePath(resolvedPath)) {
                 resolvedPath = QCoreApplication::applicationDirPath() + "/" + resolvedPath;

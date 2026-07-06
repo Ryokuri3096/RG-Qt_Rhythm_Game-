@@ -31,7 +31,7 @@ SongWindow::~SongWindow()
     delete ui;
 }
 
-// ── 背景绘制 ──
+// 背景绘制
 void SongWindow::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event);

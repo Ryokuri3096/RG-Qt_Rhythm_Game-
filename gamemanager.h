@@ -24,14 +24,14 @@ public:
     void addAllNoteNum() { m_allNoteNum++; };
 
 signals:
-    // 分数 连击数变化时发射 用于更新PlayWindow显示的信息 由SongWindow接收
+
     void scoreChanged(int score);
     void comboChanged(int combo);
     void accuracyChanged(double accuracy);
     void judgementResult(const QString &text, GameManager *gm);
 
 public slots:
-    // 接受PlayWindow发射的信号 处理音符判定 999表示miss
+
     void onJudgement(int diffMs);
 
 private:

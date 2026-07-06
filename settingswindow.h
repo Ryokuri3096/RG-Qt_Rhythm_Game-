@@ -26,7 +26,7 @@ public:
 
     void setMainWindow(MainWindow *win);
 
-    // 获取当前键位映射，供 PlayWindow 读取
+    // 获取当前键位映射
     const int* getKeyMapping() const { return m_keyMapping; }
 
 signals:
@@ -65,7 +65,7 @@ private:
     void connectSignals();     // 连接信号槽
     void loadSettings();       // 加载保存的设置
     void saveSettings();       // 保存设置
-    void updateValueLabels();  // 更新所有数值显示（音量+流速）
+    void updateValueLabels();  // 更新所有数值显示
     void updateButtonStates(); // 更新加减按钮可用状态
     void updateOverlayPos();   // 更新遮罩层位置
 
@@ -74,11 +74,11 @@ private:
     QSettings *m_settings;
 
     // 当前设置值
-    double m_musicVolume; // 0.0 ~ 1.0
-    double m_sfxVolume;   // 0.0 ~ 1.0
-    double m_speed;       // 0.01 ~ 2.00（流速）
+    double m_musicVolume;
+    double m_sfxVolume;
+    double m_speed;
 
-    // 控件指针数组 [music, sfx, speed]
+    // 控件指针数组
     QSlider *m_sliders[3];
     QLabel *m_valueLabels[3];
     QPushButton *m_minusBtns[3];
@@ -87,7 +87,7 @@ private:
     // 键位映射
     int m_keyMapping[4];          // 存储 Qt::Key 值
     QPushButton *m_keyBtns[4];    // 四个轨道按钮
-    int m_waitingForLane = -1;    // -1=不在等待，0~3=等待用户按下的轨道
+    int m_waitingForLane = -1;
 
     // 音效
     QSoundEffect *m_click1Sfx = nullptr; // 通用按钮

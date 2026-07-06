@@ -21,7 +21,6 @@ SettingsWindow::SettingsWindow(QWidget *parent)
 
     m_background.load(":/img/play_bp.jpg");
 
-    // 从 .ui 中收集控件指针，存入数组方便批量操作
     // [0]=music, [1]=sfx, [2]=speed
     m_sliders[0] = ui->musicVolumeSlider;
     m_sliders[1] = ui->sfxVolumeSlider;
@@ -45,19 +44,17 @@ SettingsWindow::SettingsWindow(QWidget *parent)
     m_keyBtns[2] = ui->lane2Btn;
     m_keyBtns[3] = ui->lane3Btn;
 
-    // 默认键位映射（S / D / J / K）
+    // 默认键位映射
     int defaultKeys[] = {Qt::Key_S, Qt::Key_D, Qt::Key_J, Qt::Key_K};
     for (int i = 0; i < 4; i++) {
         m_keyMapping[i] = defaultKeys[i];
     }
 
     // 设置滑动条范围和初始值
-    // 音量: 0~100
     for (int i = 0; i < 2; i++) {
         m_sliders[i]->setRange(0, 100);
         m_sliders[i]->setValue(50);
     }
-    // 流速: 1~200（对应 0.01 ~ 2.00）
     m_sliders[2]->setRange(1, 200);
     m_sliders[2]->setValue(100);
 
@@ -128,7 +125,7 @@ void SettingsWindow::applyStyles()
 // 信号槽连接
 void SettingsWindow::connectSignals()
 {
-    // 音量滑动条（music, sfx 共用 onVolumeSliderChanged）
+    // 音量滑动条
     connect(ui->musicVolumeSlider, &QSlider::valueChanged, this, &SettingsWindow::onVolumeSliderChanged);
     connect(ui->sfxVolumeSlider,   &QSlider::valueChanged, this, &SettingsWindow::onVolumeSliderChanged);
     // 流速滑动条
@@ -154,7 +151,7 @@ void SettingsWindow::onVolumeSliderChanged(int val)
 {
     QSlider *s = qobject_cast<QSlider*>(sender());
     int idx = -1;
-    for (int i = 0; i < 2; i++) { // 只检查 [0]=music, [1]=sfx
+    for (int i = 0; i < 2; i++) {
         if (m_sliders[i] == s) { idx = i; break; }
     }
     if (idx < 0) return;
@@ -173,7 +170,7 @@ void SettingsWindow::onVolumeSliderChanged(int val)
 
 void SettingsWindow::onSpeedSliderChanged(int val)
 {
-    m_speed = val / 100.0; // 1~200 → 0.01~2.00
+    m_speed = val / 100.0;
     updateValueLabels();
     updateButtonStates();
     saveSettings();
@@ -234,7 +231,7 @@ void SettingsWindow::keyPressEvent(QKeyEvent *event)
 {
     if (m_waitingForLane >= 0) {
         int key = event->key();
-        // 忽略修饰键单独按下（Shift/Ctrl/Alt/Meta/Esc ）
+        // 忽略修饰键单独按下
         if (key == Qt::Key_Shift || key == Qt::Key_Control ||
             key == Qt::Key_Alt || key == Qt::Key_Meta || key == Qt::Key_Escape) {
             return;
@@ -259,7 +256,7 @@ void SettingsWindow::keyPressEvent(QKeyEvent *event)
     QMainWindow::keyPressEvent(event);
 }
 
-// 数值显示更新（音量 + 流速）
+// 数值显示更新
 void SettingsWindow::updateValueLabels()
 {
     m_valueLabels[0]->setText(QString::number(m_musicVolume, 'f', 2));
@@ -317,7 +314,7 @@ void SettingsWindow::saveSettings()
     }
 }
 
-// 遮罩层定位（80%×80%）
+// 遮罩层定位
 void SettingsWindow::updateOverlayPos()
 {
     QWidget *cw = ui->centralwidget;
@@ -331,7 +328,7 @@ void SettingsWindow::updateOverlayPos()
     }
 }
 
-// 背景绘制（全屏铺满、比例不变形）
+// 背景绘制
 void SettingsWindow::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event);
